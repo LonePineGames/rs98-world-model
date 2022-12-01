@@ -1,13 +1,18 @@
 use bevy::prelude::IVec2;
 
-use crate::kind::Kind;
+use crate::{kind::Kind, act::Action};
 
+#[derive(Default)]
 pub struct Auto {
   pub kind: Kind,
   pub parent: AutoNdx,
   pub children: Vec<AutoNdx>,
   pub items: Vec<Kind>,
   pub dim: IVec2,
+  pub action: Action,
+  pub loc: IVec2,
+  pub action_time: f64,
+  pub stall_message: Option<String>,
 }
 
 impl Auto {
@@ -41,5 +46,5 @@ impl Auto {
   }
 }
 
-#[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Hash)]
 pub struct AutoNdx(pub usize);

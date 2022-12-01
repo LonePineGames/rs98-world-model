@@ -1,4 +1,4 @@
-#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Hash)]
 pub struct Kind(pub usize);
 
 pub struct KindData {
@@ -16,6 +16,7 @@ impl Kinds {
     kinds.push(KindData { name: "missingno".to_string() });
     kinds.push(KindData { name: "grass".to_string() });
     kinds.push(KindData { name: "rock".to_string() });
+    kinds.push(KindData { name: "robo".to_string() });
     Kinds { kinds }
   }
 

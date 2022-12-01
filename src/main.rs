@@ -1,5 +1,6 @@
-
+mod act;
 mod auto;
+mod dir;
 mod kind;
 mod world;
 
