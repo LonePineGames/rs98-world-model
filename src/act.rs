@@ -1,6 +1,6 @@
 use bevy::prelude::IVec2;
 
-use crate::{kind::Kind, world::World, auto::AutoNdx, dir::Dir};
+use crate::{kind::Kind, world::World, auto::AutoNdx, dir::Dir, route::route};
 
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Hash)]
 pub enum Action {
@@ -101,7 +101,8 @@ impl Action {
       Action::Goto(loc) => {
         let auto_data = world.get_auto(auto);
         let auto_loc = auto_data.loc;
-        let dir = Dir::from_ivec2(*loc - auto_loc);
+        let dir = route(world, auto, *loc);
+        //let dir = Dir::from_ivec2(*loc - auto_loc);
         println!("dir: {:?}", dir);
         if dir == Dir::None {
           world.finish_auto_action(auto);

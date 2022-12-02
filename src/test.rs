@@ -95,6 +95,8 @@ fn test_goto() {
   let start = IVec2::new(10, 10);
   let end = IVec2::new(20, 20);
 
+  world.set_all_tiles(space, world.kinds.get("grass"));
+
   let robo = world.create_auto(Auto {
     kind: world.kinds.get("robo"),
     loc: start,
@@ -105,14 +107,16 @@ fn test_goto() {
 
   world.set_auto_action(robo, Action::Goto(end));
 
+  let mut steps = 0;
   while world.get_auto(robo).action != Action::Stop {
     world.update(2.0);
     assert_eq!(world.stall_message(robo), None);
-    println!("robo loc: {:?}", world.get_auto(robo).loc);
+    steps += 1;
   }
 
   assert_eq!(world.get_auto(robo).loc, end);
   assert_eq!(world.get_auto(robo).action, Action::Stop);
+  assert_eq!(steps, 21);
 }
 
 #[test]
@@ -121,6 +125,8 @@ fn test_goto_impeded() {
   let space = AutoNdx(0);
   let start = IVec2::new(10, 10);
   let end = IVec2::new(20, 20);
+
+  world.set_all_tiles(space, world.kinds.get("grass"));
 
   for x in 0..40 {
     world.set_tile(space, IVec2::new(x, 15), world.kinds.get("wall"));
@@ -145,6 +151,5 @@ fn test_goto_impeded() {
 
   assert_eq!(world.get_auto(robo).loc, end);
   assert_eq!(world.get_auto(robo).action, Action::Stop);
-  assert!(steps < 100);
-  //assert!(steps > 25);
+  assert_eq!(steps, 43);
 }

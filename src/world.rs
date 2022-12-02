@@ -1,7 +1,7 @@
 
 use bevy::prelude::IVec2;
 
-use crate::{auto::{Auto, AutoNdx}, kind::{Kind, Kinds}, act::Action};
+use crate::{auto::{Auto, AutoNdx}, kind::{Kind, Kinds}, act::Action, dir::Dir};
 
 pub struct World {
   pub autos: Vec<Auto>,
@@ -106,5 +106,33 @@ impl World {
       }
     }
     ndxes
+  }
+
+  pub fn traction_valid(&self, parent: AutoNdx, auto: Kind, pos: IVec2) -> bool {
+    let auto = self.kinds.get_data(auto);
+    let ground = self.get_tile(parent, pos);
+    let ground = self.kinds.get_data(ground);
+    return auto.traction > ground.traction;
+  }
+
+  fn get_tile(&self, parent: AutoNdx, pos: IVec2) -> Kind {
+    let parent = self.get_auto(parent);
+    let ndx = parent.get_ndx(pos);
+    if ndx >= 0 && ndx < parent.tiles.len() as i32 {
+      parent.tiles[ndx as usize]
+    } else {
+      self.kinds.nothing()
+    }
+  }
+
+  pub fn set_all_tiles(&mut self, space_ndx: AutoNdx, tile_kind: Kind) {
+    let space = self.get_auto(space_ndx);
+    let dim = space.dim;
+    for y in 0..dim.y {
+      for x in 0..dim.x {
+        let loc = IVec2::new(x, y);
+        self.set_tile(space_ndx, loc, tile_kind);
+      }
+    }
   }
 }

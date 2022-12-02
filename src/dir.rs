@@ -34,4 +34,18 @@ impl Dir {
       Dir::None
     }
   }
+
+  pub fn all() -> Vec<Dir> {
+    vec![Dir::North, Dir::East, Dir::South, Dir::West]
+  }
+
+  pub fn invert(&self) -> Dir {
+    match self {
+      Dir::North => Dir::South,
+      Dir::East => Dir::West,
+      Dir::South => Dir::North,
+      Dir::West => Dir::East,
+      Dir::None => Dir::None,
+    }
+  }
 }
