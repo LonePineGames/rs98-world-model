@@ -17,6 +17,7 @@ impl Kinds {
     kinds.push(KindData { name: "grass".to_string() });
     kinds.push(KindData { name: "rock".to_string() });
     kinds.push(KindData { name: "robo".to_string() });
+    kinds.push(KindData { name: "machine".to_string() });
     Kinds { kinds }
   }
 

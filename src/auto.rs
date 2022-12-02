@@ -2,12 +2,13 @@ use bevy::prelude::IVec2;
 
 use crate::{kind::Kind, act::Action};
 
-#[derive(Default)]
+#[derive(Clone, Default)]
 pub struct Auto {
   pub kind: Kind,
   pub parent: AutoNdx,
   pub children: Vec<AutoNdx>,
   pub items: Vec<Kind>,
+  pub tiles: Vec<Kind>,
   pub dim: IVec2,
   pub action: Action,
   pub loc: IVec2,
@@ -41,8 +42,22 @@ impl Auto {
     }
   }
 
-  fn get_ndx(&self, loc: IVec2) -> i32 {
+  pub fn get_ndx(&self, loc: IVec2) -> i32 {
     loc.x + loc.y * self.dim.x
+  }
+
+  pub fn initalize(&self) -> Auto {
+    let mut new = Auto {
+      ..(*self).clone()
+    };
+    let num_items = (new.dim.x * new.dim.y) as usize;
+    if new.items.len() < num_items {
+      new.items.resize(num_items, Kind(0));
+    }
+    if new.tiles.len() < num_items {
+      new.tiles.resize(num_items, Kind(0));
+    }
+    new
   }
 }
 

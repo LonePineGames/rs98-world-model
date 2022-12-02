@@ -23,11 +23,7 @@ impl World {
   }
 
   pub fn create_auto(&mut self, new: Auto) -> AutoNdx {
-    let mut new = new;
-    let num_items = (new.dim.x * new.dim.y) as usize;
-    if new.items.len() < num_items {
-      new.items.resize(num_items, Kind(0));
-    }
+    let new = new.initalize();
     self.autos.push(new);
     AutoNdx(self.autos.len() - 1)
   }
@@ -78,15 +74,37 @@ impl World {
   pub fn update_auto(&mut self, ndx: AutoNdx, dur: f64) {
     let auto = self.get_auto_mut(ndx);
     auto.action_time += dur;
+    println!("Action time: {}", auto.action_time);
     if auto.action_time >= 1.0 {
       auto.action_time = 0.0;
       let action = auto.action;
       let stall_message = action.act(self, ndx);
       let auto = self.get_auto_mut(ndx);
-      if stall_message.is_none() {
-        auto.action = Action::Stop;
-      }
       auto.stall_message = stall_message;
     }
+  }
+
+  pub fn finish_auto_action(&mut self, ndx: AutoNdx) {
+    let auto = self.get_auto_mut(ndx);
+    auto.action = Action::Stop;
+    auto.action_time = 0.0;
+  }
+
+  pub fn set_tile(&mut self, space: AutoNdx, loc: IVec2, kind: Kind) {
+    let space = self.get_auto_mut(space);
+    let ndx = space.get_ndx(loc);
+    if ndx >= 0 && ndx < space.tiles.len() as i32 {
+      space.tiles[ndx as usize] = kind;
+    }
+  }
+
+  pub fn get_autos_at(&self, parent_ndx: AutoNdx, loc: IVec2) -> Vec<AutoNdx> {
+    let mut ndxes = vec![];
+    for (ndx, auto) in self.autos.iter().enumerate() {
+      if auto.parent == parent_ndx && auto.loc == loc {
+        ndxes.push(AutoNdx(ndx));
+      }
+    }
+    ndxes
   }
 }
