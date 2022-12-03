@@ -153,3 +153,38 @@ fn test_goto_impeded() {
   assert_eq!(world.get_auto(robo).action, Action::Stop);
   assert_eq!(steps, 43);
 }
+
+#[test]
+fn test_produce() {
+  let mut world = World::new_test();
+  let space = AutoNdx(0);
+  let loc = IVec2::new(10, 10);
+  let rock = world.kinds.get("rock");
+  let machine = world.kinds.get("machine");
+  let machine_ndx = world.create_auto(Auto {
+    kind: machine,
+    loc,
+    parent: space,
+    dim: IVec2::new(1, 1),
+    ..Auto::default()
+  });
+  let robo = world.create_auto(Auto {
+    kind: world.kinds.get("robo"),
+    loc,
+    items: vec![rock],
+    parent: space,
+    dim: IVec2::new(1, 1),
+    ..Auto::default()
+  });
+
+  world.set_auto_action(robo, Action::Place(machine));
+  world.update(2.0);
+  assert_eq!(world.stall_message(robo), None);
+  assert_eq!(world.get_item(machine_ndx, IVec2::new(0, 0)), rock);
+  assert_eq!(world.get_item(robo, IVec2::new(0, 0)), world.kinds.nothing());
+
+  world.set_auto_action(machine_ndx, Action::Produce);
+  world.update(2.0);
+  assert_eq!(world.stall_message(robo), None);
+  assert_eq!(world.get_item(machine_ndx, IVec2::new(0, 0)), world.kinds.get("thing"));
+}

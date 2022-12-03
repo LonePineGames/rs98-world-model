@@ -59,6 +59,10 @@ impl Auto {
     }
     new
   }
+
+  pub fn ndx_to_loc(&self, ndx: usize) -> IVec2 {
+    IVec2::new(ndx as i32 % self.dim.x, ndx as i32 / self.dim.x)
+  }
 }
 
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Hash)]

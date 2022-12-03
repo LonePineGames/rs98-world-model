@@ -55,7 +55,7 @@ pub fn route(world: &World, auto: AutoNdx, dest: IVec2) -> Dir {
 
     // For each node we can reach, see if we can find a way with
     // a lower cost going through this node
-    for dir in [Dir::North, Dir::East, Dir::South, Dir::West] {
+    for dir in Dir::all() {
       let next_pos = pos + dir.to_ivec2();
       if !world.traction_valid(parent, kind, next_pos) { continue; }
       let to = RouteNode { cost: cost + 1, pos: next_pos };

@@ -10,6 +10,7 @@ pub enum Action {
   Pick(Kind, Kind),
   Place(Kind),
   Goto(IVec2),
+  Produce,
 }
 
 impl Action {
@@ -112,6 +113,22 @@ impl Action {
           let new_loc = auto.loc + dir.to_ivec2();
           auto.loc = new_loc;
           None
+        }
+      }
+
+      Action::Produce => {
+        let auto_data = world.get_auto(auto);
+        let holding = world.get_items(auto);
+        let pattern = world.get_pattern(auto_data.kind, &holding);
+        if let Some(pattern) = pattern {
+          for (ndx, kind) in pattern.output.iter().enumerate() {
+            let loc = world.get_auto(auto).ndx_to_loc(ndx);
+            world.set_item(auto, loc, *kind);
+          }
+          world.finish_auto_action(auto);
+          None
+        } else {
+          Some(format!("Could not find pattern for {:?} with {:?}", auto_data.kind, holding))
         }
       }
     }

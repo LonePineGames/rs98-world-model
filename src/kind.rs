@@ -41,6 +41,10 @@ impl Kinds {
       name: "wall".to_string(),
       traction: 5,
     });
+    kinds.push(KindData { 
+      name: "thing".to_string(),
+      traction: 5,
+    });
     Kinds { kinds }
   }
 

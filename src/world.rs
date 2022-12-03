@@ -1,17 +1,20 @@
 
 use bevy::prelude::IVec2;
 
-use crate::{auto::{Auto, AutoNdx}, kind::{Kind, Kinds}, act::Action, dir::Dir};
+use crate::{auto::{Auto, AutoNdx}, kind::{Kind, Kinds}, act::Action, dir::Dir, pattern::{Pattern, Patterns}};
 
 pub struct World {
   pub autos: Vec<Auto>,
   pub kinds: Kinds,
+  pub patterns: Patterns,
 }
 
 impl World {
   pub fn new_test() -> World {
+    let kinds = Kinds::new_test();
     let mut world = World {
-      kinds: Kinds::new_test(),
+      patterns: Patterns::new_test(&kinds),
+      kinds,
       autos: vec![],
     };
     world.create_auto(Auto {
@@ -134,5 +137,14 @@ impl World {
         self.set_tile(space_ndx, loc, tile_kind);
       }
     }
+  }
+
+  pub fn get_items(&self, auto: AutoNdx) -> Vec<Kind> {
+    let auto = self.get_auto(auto);
+    auto.items.clone()
+  }
+
+  pub fn get_pattern(&self, kind: Kind, holding: &Vec<Kind>) -> Option<Pattern> {
+    self.patterns.get(kind, holding)
   }
 }
