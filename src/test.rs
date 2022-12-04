@@ -188,3 +188,48 @@ fn test_produce() {
   assert_eq!(world.stall_message(robo), None);
   assert_eq!(world.get_item(machine_ndx, IVec2::new(0, 0)), world.kinds.get("thing"));
 }
+
+#[test]
+fn test_fire() {
+  let mut world = World::new_test();
+  let space = AutoNdx(0);
+  let loc1 = IVec2::new(10, 10);
+  let robo1 = world.create_auto(Auto {
+    kind: world.kinds.get("robo"),
+    loc: loc1,
+    parent: space,
+    dim: IVec2::new(1, 1),
+    ..Auto::default()
+  });
+
+  let loc2 = IVec2::new(10, 12);
+  let robo2 = world.create_auto(Auto {
+    kind: world.kinds.get("robo"),
+    loc: loc2,
+    parent: space,
+    dim: IVec2::new(1, 1),
+    ..Auto::default()
+  });
+  assert_eq!(world.get_auto(robo2).alive, true);
+
+  world.set_auto_action(robo1, Action::Fire(robo2));
+  world.update(2.0);
+  assert_eq!(world.stall_message(robo1), None);
+  assert_eq!(world.get_auto(robo2).alive, false);
+
+  // test range limits
+  let loc3 = IVec2::new(10, 20);
+  let robo3 = world.create_auto(Auto {
+    kind: world.kinds.get("robo"),
+    loc: loc3,
+    parent: space,
+    dim: IVec2::new(1, 1),
+    ..Auto::default()
+  });
+
+  world.set_auto_action(robo1, Action::Fire(robo3));
+  world.update(2.0);
+
+  assert_eq!(world.stall_message(robo1), Some("Target out of range.".to_string()));
+  assert_eq!(world.get_auto(robo3).alive, true);
+}

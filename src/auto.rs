@@ -14,6 +14,7 @@ pub struct Auto {
   pub loc: IVec2,
   pub action_time: f64,
   pub stall_message: Option<String>,
+  pub alive: bool,
 }
 
 impl Auto {
@@ -47,9 +48,8 @@ impl Auto {
   }
 
   pub fn initalize(&self) -> Auto {
-    let mut new = Auto {
-      ..(*self).clone()
-    };
+    let mut new = self.clone();
+    new.alive = true;
     let num_items = (new.dim.x * new.dim.y) as usize;
     if new.items.len() < num_items {
       new.items.resize(num_items, Kind(0));

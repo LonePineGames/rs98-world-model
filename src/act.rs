@@ -11,6 +11,7 @@ pub enum Action {
   Place(Kind),
   Goto(IVec2),
   Produce,
+  Fire(AutoNdx),
 }
 
 impl Action {
@@ -100,8 +101,6 @@ impl Action {
       }
 
       Action::Goto(loc) => {
-        let auto_data = world.get_auto(auto);
-        let auto_loc = auto_data.loc;
         let dir = route(world, auto, *loc);
         //let dir = Dir::from_ivec2(*loc - auto_loc);
         println!("dir: {:?}", dir);
@@ -129,6 +128,20 @@ impl Action {
           None
         } else {
           Some(format!("Could not find pattern for {:?} with {:?}", auto_data.kind, holding))
+        }
+      }
+
+      Action::Fire(other) => {
+        let my_loc = world.get_auto(auto).loc;
+        let other_loc = world.get_auto(*other).loc;
+        let dist = my_loc - other_loc;
+        let dist = dist.x.abs() + dist.y.abs();
+        if dist <= 5 {
+          world.get_auto_mut(*other).alive = false;
+          world.finish_auto_action(auto);
+          None
+        } else {
+          Some("Target out of range.".to_string())
         }
       }
     }
