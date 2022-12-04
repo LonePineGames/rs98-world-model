@@ -1,7 +1,7 @@
 
 use bevy::prelude::IVec2;
 
-use crate::{auto::{Auto, AutoNdx}, kind::{Kind, Kinds}, act::Action, dir::Dir, pattern::{Pattern, Patterns}};
+use crate::model::{auto::{Auto, AutoNdx}, kind::{Kind, Kinds}, act::Action, dir::Dir, pattern::{Pattern, Patterns}};
 
 pub struct World {
   pub autos: Vec<Auto>,

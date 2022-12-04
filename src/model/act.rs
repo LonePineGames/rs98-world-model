@@ -1,6 +1,6 @@
 use bevy::prelude::IVec2;
 
-use crate::{kind::Kind, world::World, auto::AutoNdx, dir::Dir, route::route};
+use crate::model::{kind::Kind, world::World, auto::AutoNdx, dir::Dir, route::route};
 
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Hash)]
 pub enum Action {

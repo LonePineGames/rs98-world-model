@@ -1,6 +1,7 @@
+
 use bevy::prelude::IVec2;
 
-use crate::{auto::{AutoNdx, Auto}, world::World, act::Action, dir::Dir};
+use crate::model::{auto::{AutoNdx, Auto}, world::World, act::Action, dir::Dir};
 
 #[test]
 fn test_items_on_ground() {

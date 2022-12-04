@@ -1,14 +1,6 @@
-mod act;
-mod auto;
-mod dir;
-mod kind;
-mod pattern;
-mod route;
-mod world;
-
-#[cfg(test)]
-mod test;
+mod draw;
+mod model;
 
 fn main() {
-    println!("Hello, world!");
+    draw::app::start_app();
 }

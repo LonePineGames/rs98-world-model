@@ -1,4 +1,4 @@
-use crate::kind::{Kind, Kinds};
+use crate::model::kind::{Kind, Kinds};
 
 #[derive(Clone, Default)]
 pub struct Pattern {

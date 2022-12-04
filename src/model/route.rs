@@ -2,7 +2,7 @@ use std::{collections::{BinaryHeap, HashMap}, cmp::Ordering};
 
 use bevy::prelude::IVec2;
 
-use crate::{world::World, kind::Kind, dir::Dir, auto::AutoNdx};
+use crate::model::{world::World, dir::Dir, auto::AutoNdx};
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
 struct RouteNode {

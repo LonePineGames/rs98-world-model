@@ -1,6 +1,6 @@
 use bevy::prelude::IVec2;
 
-use crate::{kind::Kind, act::Action};
+use crate::model::{kind::Kind, act::Action};
 
 #[derive(Clone, Default)]
 pub struct Auto {
