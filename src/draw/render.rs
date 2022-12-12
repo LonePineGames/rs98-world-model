@@ -50,12 +50,6 @@ pub fn setup_render(
     ..default()
   });*/
 
-  // light
-  commands.spawn(PointLightBundle {
-    transform: Transform::from_xyz(3.0, 8.0, 5.0),
-    ..default()
-  });
-
   //let my_gltf = ass.load("model/r1000.glb");
   let my_gltf = ass.load("model/r1000.gltf#Scene0");
   let mut transform = Transform::from_xyz(0.0, 0.0, 0.0);
@@ -84,12 +78,11 @@ pub fn setup_render(
       ..Default::default()
   });
 
-  // render a 10x10 grid of tiles
-  for x in 0..10 {
-    for y in 0..10 {
+  for x in 0..30 {
+    for y in 0..30 {
       
       let tire_gltf = ass.load("model/lab-tile.glb#Scene0");
-      let mut transform = Transform::from_xyz(x as f32 - 5.0, y as f32 - 5.0, 0.0);
+      let mut transform = Transform::from_xyz(x as f32 - 15.0, y as f32 - 15.0, 0.0);
       transform.rotate(Quat::from_rotation_x(std::f32::consts::PI / 2.0));
       commands.spawn(SceneBundle {
           scene: tire_gltf,
