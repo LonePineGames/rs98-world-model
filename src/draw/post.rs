@@ -19,25 +19,28 @@ use bevy::{
   sprite::{Material2d, Material2dPlugin, MaterialMesh2dBundle},
 };
 
-pub(crate) fn main() {
-  App::new()
-      .add_plugins(DefaultPlugins)
+use super::app::SSPost;
+
+pub struct RS98PostPlugin;
+
+impl Plugin for RS98PostPlugin {
+  fn build(&self, app: &mut App) {
+    app
       .add_plugin(Material2dPlugin::<PostProcessingMaterial>::default())
-      .add_startup_system(setup)
-      .add_system(main_camera_cube_rotator_system)
-      .run();
+      .add_startup_system_to_stage(SSPost, setup_post);
+  }
 }
 
-/// Marks the first camera cube (rendered to a texture.)
-#[derive(Component)]
-struct MainCube;
+#[derive(Resource)]
+pub struct RenderImage {
+  pub image: Handle<Image>,
+}
 
-fn setup(
+fn setup_post(
   mut commands: Commands,
   mut windows: ResMut<Windows>,
   mut meshes: ResMut<Assets<Mesh>>,
   mut post_processing_materials: ResMut<Assets<PostProcessingMaterial>>,
-  mut materials: ResMut<Assets<StandardMaterial>>,
   mut images: ResMut<Assets<Image>>,
 ) {
   let window = windows.primary_mut();
@@ -68,34 +71,10 @@ fn setup(
 
   let image_handle = images.add(image);
 
-  let cube_handle = meshes.add(Mesh::from(shape::Cube { size: 4.0 }));
-  let cube_material_handle = materials.add(StandardMaterial {
-      base_color: Color::rgb(0.8, 0.7, 0.6),
-      reflectance: 0.02,
-      unlit: false,
-      ..default()
-  });
-
-  // The cube that will be rendered to the texture.
-  commands.spawn((
-      PbrBundle {
-          mesh: cube_handle,
-          material: cube_material_handle,
-          transform: Transform::from_translation(Vec3::new(0.0, 0.0, 1.0)),
-          ..default()
-      },
-      MainCube,
-  ));
-
-  // Light
-  // NOTE: Currently lights are ignoring render layers - see https://github.com/bevyengine/bevy/issues/3462
-  commands.spawn(PointLightBundle {
-      transform: Transform::from_translation(Vec3::new(0.0, 0.0, 10.0)),
-      ..default()
-  });
+  commands.insert_resource(RenderImage { image: image_handle.clone() });
 
   // Main camera, first to render
-  commands.spawn((
+  /*commands.spawn((
       Camera3dBundle {
           camera_3d: Camera3d {
               clear_color: ClearColorConfig::Custom(Color::WHITE),
@@ -112,7 +91,7 @@ fn setup(
       // Disable UI rendering for the first pass camera. This prevents double rendering of UI at
       // the cost of rendering the UI without any post processing effects.
       UiCameraConfig { show_ui: false },
-  ));
+  ));*/
 
   // This specifies the layer used for the post processing camera, which will be attached to the post processing camera and 2d quad.
   let post_processing_pass_layer = RenderLayers::layer((RenderLayers::TOTAL_LAYERS - 1) as u8);
@@ -152,18 +131,8 @@ fn setup(
           ..Camera2dBundle::default()
       },
       post_processing_pass_layer,
+      UiCameraConfig { show_ui: false },
   ));
-}
-
-/// Rotates the cube rendered by the main camera
-fn main_camera_cube_rotator_system(
-  time: Res<Time>,
-  mut query: Query<&mut Transform, With<MainCube>>,
-) {
-  for mut transform in &mut query {
-      transform.rotate_x(0.55 * time.delta_seconds());
-      transform.rotate_z(0.15 * time.delta_seconds());
-  }
 }
 
 // Region below declares of the custom material handling post processing effect

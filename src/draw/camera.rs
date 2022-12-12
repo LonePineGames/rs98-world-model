@@ -1,6 +1,8 @@
 use std::ops::MulAssign;
 
-use bevy::{prelude::*, render::camera::ScalingMode, input::mouse::{MouseMotion, MouseScrollUnit, MouseWheel}, core_pipeline::bloom::BloomSettings};
+use bevy::{prelude::*, render::camera::{ScalingMode, RenderTarget}, input::mouse::{MouseMotion, MouseScrollUnit, MouseWheel}, core_pipeline::bloom::BloomSettings};
+
+use super::{post::RenderImage, app::SSCamera};
 
 pub struct RS98CameraPlugin;
 
@@ -12,33 +14,41 @@ struct CameraTarget {
 
 impl Plugin for RS98CameraPlugin {
     fn build(&self, app: &mut App) {
-        app.add_startup_system(setup_camera)
+        app.add_startup_system_to_stage(SSCamera, setup_camera)
             .add_system(update_camera);
     }
 }
 
-pub fn setup_camera(mut commands: Commands) {
+pub fn setup_camera(
+  mut commands: Commands,
+  render_image: Res<RenderImage>,
+) {
   /*// initial rotation
   let mut rotation = Quat::from_rotation_y(-std::f32::consts::FRAC_PI_4);
   rotation.mul_assign(Quat::from_rotation_x(-std::f32::consts::FRAC_PI_4));*/
 
   // camera
-  commands.spawn(Camera3dBundle {
-    camera: Camera {
-      hdr: true,
+  commands.spawn((
+    Camera3dBundle {
+      camera: Camera {
+        hdr: true,
+        target: RenderTarget::Image(render_image.image.clone()),
+        ..default()
+      },
+      projection: OrthographicProjection {
+        scale: 3.0,
+        scaling_mode: ScalingMode::FixedVertical(2.0),
+        ..default()
+      }.into(),
+      transform: Transform::from_xyz(-1.0, 5.0, 5.0).looking_at(Vec3::ZERO, Vec3::Z),
       ..default()
     },
-    projection: OrthographicProjection {
-      scale: 3.0,
-      scaling_mode: ScalingMode::FixedVertical(2.0),
-      ..default()
-    }.into(),
-    transform: Transform::from_xyz(-1.0, 5.0, 5.0).looking_at(Vec3::ZERO, Vec3::Z),
-    ..default()
-  }).insert(CameraTarget {
-    looking_at: Vec3::ZERO,
-    distance: 5.0,
-  }).insert(BloomSettings::default());
+    CameraTarget {
+      looking_at: Vec3::ZERO,
+      distance: 5.0,
+    },
+    BloomSettings::default()
+  ));
 
   let size = 10.0;
   let shadow_projection = OrthographicProjection {
