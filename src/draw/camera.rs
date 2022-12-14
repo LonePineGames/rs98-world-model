@@ -6,17 +6,17 @@ use super::{post::RenderImage, app::SSCamera};
 
 pub struct RS98CameraPlugin;
 
-#[derive(Component)]
-struct CameraTarget {
-  looking_at: Vec3,
-  distance: f32,
-}
-
 impl Plugin for RS98CameraPlugin {
     fn build(&self, app: &mut App) {
         app.add_startup_system_to_stage(SSCamera, setup_camera)
             .add_system(update_camera);
     }
+}
+
+#[derive(Component)]
+struct CameraTarget {
+  looking_at: Vec3,
+  distance: f32,
 }
 
 pub fn setup_camera(

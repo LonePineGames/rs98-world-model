@@ -1,8 +1,9 @@
 
-use bevy::prelude::IVec2;
+use bevy::prelude::{IVec2, Resource};
 
 use crate::model::{auto::{Auto, AutoNdx}, kind::{Kind, Kinds}, act::Action, dir::Dir, pattern::{Pattern, Patterns}};
 
+#[derive(Resource)]
 pub struct World {
   pub autos: Vec<Auto>,
   pub kinds: Kinds,
