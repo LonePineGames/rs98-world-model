@@ -1,7 +1,9 @@
 
-use bevy::prelude::{IVec2, Resource};
+use bevy::{prelude::{IVec2, Resource, Plugin, App, ResMut, Res}, time::Time};
 
-use crate::model::{auto::{Auto, AutoNdx}, kind::{Kind, Kinds}, act::Action, dir::Dir, pattern::{Pattern, Patterns}};
+use crate::model::{auto::{Auto, AutoNdx}, kind::{Kind, Kinds}, act::Action, pattern::{Pattern, Patterns}};
+
+use super::dir::Dir;
 
 #[derive(Resource)]
 pub struct World {
@@ -23,6 +25,43 @@ impl World {
       dim: IVec2::new(100, 100),
       ..Auto::default()
     });
+    world
+  }
+
+  pub fn new_lab() -> World {
+    let kinds = Kinds::new_test();
+    let dim = IVec2::new(50, 50);
+    let mut world = World {
+      patterns: Patterns::new_test(&kinds),
+      kinds,
+      autos: vec![],
+    };
+    world.create_auto(Auto {
+      kind: world.kinds.get("earth"),
+      dim,
+      ..Auto::default()
+    });
+    let earth = AutoNdx(0);
+
+    for x in 0..dim.x {
+      for y in 0..dim.y {
+        let loc = IVec2::new(x, y);
+        let item = if x == 0 || x == dim.x - 1 || y == 0 || y == dim.y - 1 {
+          world.kinds.get("wall")
+        } else {
+          world.kinds.get("grass")
+        };
+        world.set_tile(earth, loc, item);
+      }
+    }
+
+    world.create_auto(Auto {
+      kind: world.kinds.get("robo"),
+      parent: earth,
+      loc: IVec2::new(10, 10),
+      ..Auto::default()
+    });
+
     world
   }
 
@@ -78,7 +117,6 @@ impl World {
   pub fn update_auto(&mut self, ndx: AutoNdx, dur: f64) {
     let auto = self.get_auto_mut(ndx);
     auto.action_time += dur;
-    println!("Action time: {}", auto.action_time);
     if auto.action_time >= 1.0 {
       auto.action_time = 0.0;
       let action = auto.action;
@@ -90,7 +128,7 @@ impl World {
 
   pub fn finish_auto_action(&mut self, ndx: AutoNdx) {
     let auto = self.get_auto_mut(ndx);
-    auto.action = Action::Stop;
+    auto.action = Action::Move(Dir::South);
     auto.action_time = 0.0;
   }
 
@@ -148,4 +186,18 @@ impl World {
   pub fn get_pattern(&self, kind: Kind, holding: &Vec<Kind>) -> Option<Pattern> {
     self.patterns.get(kind, holding)
   }
+}
+
+pub struct RS98WorldPlugin;
+
+impl Plugin for RS98WorldPlugin {
+  fn build(&self, app: &mut App) {
+    app
+      .insert_resource(World::new_lab())
+      .add_system(update_world);
+  }
+}
+
+pub fn update_world(mut world: ResMut<World>, time: Res<Time>) {
+  world.update(time.delta_seconds_f64());
 }

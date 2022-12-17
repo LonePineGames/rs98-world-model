@@ -19,6 +19,7 @@ impl Action {
     println!("Action: {:?}", self);
     match self {
       Action::Stop => {
+        world.finish_auto_action(auto);
         None
       }
 

@@ -78,6 +78,7 @@ pub fn setup_render(
       ..Default::default()
   });
 
+  /* 
   for x in 0..30 {
     for y in 0..30 {
       
@@ -91,6 +92,6 @@ pub fn setup_render(
       });
 
     }
-  }
+  }*/
 
 }

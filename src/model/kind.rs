@@ -3,6 +3,7 @@ pub struct Kind(pub usize);
 
 pub struct KindData {
   pub name: String,
+  pub scene: String,
   pub traction: i32,
 }
 
@@ -15,34 +16,42 @@ impl Kinds {
     let mut kinds: Vec<KindData> = vec![];
     kinds.push(KindData { 
       name: "nothing".to_string(),
+      scene: "".to_string(),
       traction: 10,
     });
     kinds.push(KindData { 
       name: "missingno".to_string(),
+      scene: "".to_string(),
       traction: 1,
     });
     kinds.push(KindData { 
       name: "grass".to_string(),
+      scene: "model/lab-tile.glb#Scene0".to_string(),
       traction: 1,
     });
     kinds.push(KindData { 
       name: "rock".to_string(),
+      scene: "".to_string(),
       traction: 1,
     });
     kinds.push(KindData { 
       name: "robo".to_string(),
+      scene: "model/r1000.gltf#Scene0".to_string(),
       traction: 2,
     });
     kinds.push(KindData { 
       name: "machine".to_string(),
+      scene: "".to_string(),
       traction: 1,
     });
     kinds.push(KindData { 
       name: "wall".to_string(),
+      scene: "".to_string(),
       traction: 5,
     });
     kinds.push(KindData { 
       name: "thing".to_string(),
+      scene: "".to_string(),
       traction: 5,
     });
     Kinds { kinds }

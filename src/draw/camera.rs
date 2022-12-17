@@ -113,7 +113,7 @@ fn update_camera(
 
     // target.rotation *= Quat::from_rotation_y(rot_delta.x);
     // target.rotation *= Quat::from_rotation_x(rot_delta.y);
-    target.distance -= scroll_delta;
+    target.distance -= scroll_delta * target.distance;
     target.distance = clamp(target.distance, 0.1, 100.0);
 
     let camera_offset = Vec3::new(-1.0, 10.0, 10.0) * target.distance;
