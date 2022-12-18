@@ -23,7 +23,7 @@ pub fn start_app() {
 
         //.add_startup_system(setup_render)
         //.add_system(render_world)
-        //.add_system(handle_input)
+        .add_system(handle_input)
 
         .run();
 }

@@ -51,7 +51,6 @@ pub fn update_entities(
     let auto_ndx = AutoNdx(auto_ndx);
 
     let auto_tracker = TrackedEntity::Auto(auto_ndx);
-    let auto_entity = entities.get(auto_tracker);
     let auto_loc = auto.loc.as_vec2().extend(0.0);
     update_entity(auto_tracker, auto_loc, auto.kind, &mut commands, &world, &mut entities, &ass, &mut q);
     // if let Some(entity) = auto_entity {
@@ -73,45 +72,30 @@ pub fn update_entities(
     // tiles
     for (loc, tile) in auto.tiles.iter().enumerate() {
       let tracker = TrackedEntity::Tile(auto_ndx, loc);
-      let entity = entities.get(tracker);
       let loc = auto_loc + auto.ndx_to_loc(loc).as_vec2().extend(0.0);
-      if let Some(entity) = entity {
-        // if let Ok(mut transform) = q.get_mut(entity) {
-        //   transform.translation = loc;
-        // }
-      } else if *tile != Kind(0) {
-        let tile_gltf = ass.load("model/lab-tile.glb#Scene0");
-        let mut transform = Transform::from_translation(loc);
-        transform.rotate(Quat::from_rotation_x(std::f32::consts::PI / 2.0));
-        let entity = commands.spawn((SceneBundle {
-            scene: tile_gltf,
-            transform,
-            ..Default::default()
-        }, tracker)).id();
-        entities.set(tracker, entity);
-      }
+      update_entity(tracker, loc, *tile, &mut commands, &world, &mut entities, &ass, &mut q);
+      // if let Some(entity) = entity {
+      //   // if let Ok(mut transform) = q.get_mut(entity) {
+      //   //   transform.translation = loc;
+      //   // }
+      // } else if *tile != Kind(0) {
+      //   let tile_gltf = ass.load("model/lab-tile.glb#Scene0");
+      //   let mut transform = Transform::from_translation(loc);
+      //   transform.rotate(Quat::from_rotation_x(std::f32::consts::PI / 2.0));
+      //   let entity = commands.spawn((SceneBundle {
+      //       scene: tile_gltf,
+      //       transform,
+      //       ..Default::default()
+      //   }, tracker)).id();
+      //   entities.set(tracker, entity);
+      // }
     }
 
     // items
     for (loc, item) in auto.items.iter().enumerate() {
       let tracker = TrackedEntity::Item(auto_ndx, loc);
-      let entity = entities.get(tracker);
       let loc = auto_loc + auto.ndx_to_loc(loc).as_vec2().extend(0.0);
-      if let Some(entity) = entity {
-        if let Ok(mut transform) = q.get_mut(entity) {
-          transform.translation = loc;
-        }
-      } else if *item != Kind(0) {
-        let tire_gltf = ass.load("model/wheelDefault.glb#Scene0");
-        let mut transform = Transform::from_translation(loc);
-        transform.rotate(Quat::from_rotation_x(std::f32::consts::PI / 2.0));
-        let entity = commands.spawn((SceneBundle {
-            scene: tire_gltf,
-            transform,
-            ..Default::default()
-        }, tracker)).id();
-        entities.set(tracker, entity);
-      }
+      update_entity(tracker, loc, *item, &mut commands, &world, &mut entities, &ass, &mut q);
     }
   }
 }

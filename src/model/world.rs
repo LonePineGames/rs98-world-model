@@ -1,5 +1,5 @@
 
-use bevy::{prelude::{IVec2, Resource, Plugin, App, ResMut, Res}, time::Time};
+use bevy::{prelude::{IVec2, Resource, Plugin, App, ResMut, Res, Vec3}, time::Time};
 
 use crate::model::{auto::{Auto, AutoNdx}, kind::{Kind, Kinds}, act::Action, pattern::{Pattern, Patterns}};
 
@@ -128,7 +128,7 @@ impl World {
 
   pub fn finish_auto_action(&mut self, ndx: AutoNdx) {
     let auto = self.get_auto_mut(ndx);
-    auto.action = Action::Move(Dir::South);
+    auto.action = Action::Stop;
     auto.action_time = 0.0;
   }
 
@@ -185,6 +185,10 @@ impl World {
 
   pub fn get_pattern(&self, kind: Kind, holding: &Vec<Kind>) -> Option<Pattern> {
     self.patterns.get(kind, holding)
+  }
+
+  pub fn vec_to_ivec(&self, _: AutoNdx, vec: Vec3) -> IVec2 {
+    IVec2::new(vec.x as i32, vec.y as i32)
   }
 }
 

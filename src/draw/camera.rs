@@ -14,7 +14,7 @@ impl Plugin for RS98CameraPlugin {
 }
 
 #[derive(Component)]
-struct CameraTarget {
+pub struct CameraTarget {
   looking_at: Vec3,
   distance: f32,
 }
