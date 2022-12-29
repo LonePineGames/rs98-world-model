@@ -1,6 +1,6 @@
-use bevy::{prelude::{IVec2, App, Entity, AssetServer, AssetPlugin, CorePlugin}, DefaultPlugins};
+use bevy::prelude::*;
 
-use crate::{model::{world::World, auto::{Auto, AutoNdx}}, draw::entities::{update_entities, TrackedEntity}};
+use crate::{model::{world::World, auto::{AutoNdx}}, draw::entities::{update_entities}};
 
 use super::entities::Entities;
 

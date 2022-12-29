@@ -1,4 +1,4 @@
-use bevy::{prelude::{Input, MouseButton, EventReader, Res, Query, Transform, With, Camera, Vec2, GlobalTransform, ResMut}, input::mouse::MouseMotion, render::camera::RenderTarget, window::Windows};
+use bevy::{prelude::{Input, MouseButton, Res, Query, With, Camera, Vec2, GlobalTransform, ResMut}, render::camera::RenderTarget, window::Windows};
 
 use crate::model::{world::World, auto::AutoNdx, act::Action};
 

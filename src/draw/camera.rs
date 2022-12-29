@@ -1,6 +1,5 @@
-use std::ops::MulAssign;
 
-use bevy::{prelude::*, render::camera::{ScalingMode, RenderTarget}, input::mouse::{MouseMotion, MouseScrollUnit, MouseWheel}, core_pipeline::bloom::BloomSettings};
+use bevy::{prelude::*, render::camera::{ScalingMode, RenderTarget}, input::mouse::MouseWheel, core_pipeline::bloom::BloomSettings};
 
 use super::{post::RenderImage, app::SSCamera};
 

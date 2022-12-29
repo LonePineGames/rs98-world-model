@@ -2,7 +2,7 @@ use bevy::prelude::*;
 
 use crate::model::world::RS98WorldPlugin;
 
-use super::{render::{setup_render, render_world}, input::handle_input, camera::RS98CameraPlugin, text::RS98TextPlugin, post::RS98PostPlugin, entities::{RS98EntitiesPlugin, Entities}};
+use super::{input::handle_input, camera::RS98CameraPlugin, text::RS98TextPlugin, post::RS98PostPlugin, entities::{RS98EntitiesPlugin}};
 
 #[derive(StageLabel)]
 pub struct SSCamera;

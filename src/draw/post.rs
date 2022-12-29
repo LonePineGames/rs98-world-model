@@ -4,11 +4,9 @@
 //! edge detection, blur, pixelization, vignette... and countless others.
 
 use bevy::{
-  core_pipeline::clear_color::ClearColorConfig,
   prelude::*,
   reflect::TypeUuid,
   render::{
-      camera::RenderTarget,
       render_resource::{
           AsBindGroup, Extent3d, ShaderRef, TextureDescriptor, TextureDimension, TextureFormat,
           TextureUsages,
