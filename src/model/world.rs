@@ -3,8 +3,6 @@ use bevy::{prelude::{IVec2, Resource, Plugin, App, ResMut, Res, Vec3}, time::Tim
 
 use crate::model::{auto::{Auto, AutoNdx}, kind::{Kind, Kinds}, act::Action, pattern::{Pattern, Patterns}};
 
-use super::dir::Dir;
-
 #[derive(Resource)]
 pub struct World {
   pub autos: Vec<Auto>,

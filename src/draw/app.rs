@@ -1,6 +1,7 @@
 use bevy::prelude::*;
 
 use crate::model::world::RS98WorldPlugin;
+use crate::program::program::RS98ProgramPlugin;
 
 use super::{input::handle_input, camera::RS98CameraPlugin, text::RS98TextPlugin, post::RS98PostPlugin, entities::{RS98EntitiesPlugin}};
 
@@ -16,6 +17,7 @@ pub fn start_app() {
         .add_startup_stage_after(SSPost, SSCamera, SystemStage::parallel())
         .add_plugins(DefaultPlugins)
         .add_plugin(RS98WorldPlugin)
+        .add_plugin(RS98ProgramPlugin)
         .add_plugin(RS98PostPlugin)
         .add_plugin(RS98CameraPlugin)
         .add_plugin(RS98TextPlugin)
