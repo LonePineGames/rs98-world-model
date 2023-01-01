@@ -35,6 +35,16 @@ impl Dir {
     }
   }
 
+  pub fn from_str(c: &str) -> Dir {
+    match c {
+      "n" => Dir::North,
+      "e" => Dir::East,
+      "s" => Dir::South,
+      "w" => Dir::West,
+      _ => Dir::None,
+    }
+  }
+
   pub fn all() -> Vec<Dir> {
     vec![Dir::North, Dir::East, Dir::South, Dir::West]
   }

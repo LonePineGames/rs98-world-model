@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 
 use bevy::prelude::{App, Plugin};
-use conniver::{Val, State};
+use conniver::{Val, State, eval_s, p};
 
 use crate::model::{auto::AutoNdx, world::World};
 
@@ -30,18 +30,23 @@ pub fn update_program(
 
 pub struct ProgramSpace {
   procs: Vec<State>,
+  proto: State,
 }
 
 impl ProgramSpace {
   pub fn new() -> Self {
+    let mut proto = State::new();
+    proto.load_lib();
+    eval_s(&p("(load \"assets/cnvr/velocity.cnvr\")"), &mut proto);
     Self {
       procs: Vec::new(),
+      proto,
     }
   }
 
   pub fn set_program(&mut self, robo: AutoNdx, p: Val) {
     if self.procs.len() <= robo.0 {
-      self.procs.resize(robo.0 + 1, State::new());
+      self.procs.resize(robo.0 + 1, self.proto.clone());
     }
     self.procs[robo.0].set_program(p);
   }
@@ -71,5 +76,12 @@ impl ProgramSpace {
     for (event, handler, ndx) in events {
       handler(event, self, world, ndx);
     }
+  }
+
+  pub fn interrupt(&mut self, robo: AutoNdx, message: Val) {
+    if self.procs.len() <= robo.0 {
+      self.procs.resize(robo.0 + 1, self.proto.clone());
+    }
+    self.procs[robo.0].interrupt(message);
   }
 }

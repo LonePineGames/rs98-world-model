@@ -3,7 +3,7 @@ use std::collections::HashMap;
 use bevy::prelude::IVec2;
 use conniver::Val;
 
-use crate::model::{world::World, auto::AutoNdx, act::Action};
+use crate::model::{world::World, auto::AutoNdx, act::Action, dir::Dir};
 
 use super::program::ProgramSpace;
 
@@ -12,6 +12,7 @@ pub type EventHandler = fn(Vec<Val>, &mut ProgramSpace, &mut World, AutoNdx);
 pub fn get_event_handlers() -> HashMap<String, EventHandler> {
   let mut handlers = HashMap::<String, EventHandler>::new();
   handlers.insert("goto".to_string(), ev_goto);
+  handlers.insert("move".to_string(), ev_move);
   handlers
 }
 
@@ -32,4 +33,19 @@ pub fn ev_goto(args: Vec<Val>, program: &mut ProgramSpace, world: &mut World, nd
   };
 
   world.set_auto_action(ndx, Action::Goto(IVec2::new(x, y)));
+}
+
+pub fn ev_move(args: Vec<Val>, program: &mut ProgramSpace, world: &mut World, ndx: AutoNdx) {
+  println!("ev_move: {:?}", args);
+  if args.len() < 2 {
+    return;
+  }
+  let d = if let Val::Sym(d) = &args[1] {
+    d
+  } else {
+    return;
+  };
+  let d = Dir::from_str(d);
+
+  world.set_auto_action(ndx, Action::Move(d));
 }
