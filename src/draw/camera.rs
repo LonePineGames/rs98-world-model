@@ -1,5 +1,7 @@
 
-use bevy::{prelude::*, render::camera::{ScalingMode, RenderTarget}, input::mouse::MouseWheel, core_pipeline::bloom::BloomSettings};
+use bevy::{render::camera::{ScalingMode, RenderTarget}, input::mouse::MouseWheel, core_pipeline::bloom::BloomSettings, prelude::{Plugin, App, Component, Vec3, Commands, Res, Camera3dBundle, Camera, OrthographicProjection, Transform, default, DirectionalLightBundle, DirectionalLight, Color, Query, With, EventReader}};
+
+use crate::{model::world::World, program::program::ProgramSpace};
 
 use super::{post::RenderImage, app::SSCamera};
 
@@ -62,7 +64,7 @@ pub fn setup_camera(
 
   // light
   commands.spawn(DirectionalLightBundle {
-    transform: Transform::from_xyz(-5.0, 3.0, 8.0).looking_at(Vec3::ZERO, Vec3::Z),
+    transform: Transform::from_xyz(5.0, -3.0, 8.0).looking_at(Vec3::ZERO, Vec3::Z),
     directional_light: DirectionalLight {
       color: Color::rgb(0.9, 1.0, 1.0),
       illuminance: 10000.0,
@@ -76,14 +78,12 @@ pub fn setup_camera(
 
 fn update_camera(
     mut q_camera: Query<(&mut Transform, &mut CameraTarget), With<Camera>>,
-    keyboard_input: Res<Input<KeyCode>>,
-    time: Res<Time>,
     // mouse_input: Res<Input<MouseButton>>,
     // mut mouse_motion: EventReader<MouseMotion>,
     mut scroll_evr: EventReader<MouseWheel>,
+    world: Res<World>,
+    program: Res<ProgramSpace>,
 ) {
-  let time_delta = time.delta_seconds();
-  let move_delta = time_delta * -10.0;
 
   let scroll_delta: f32 = scroll_evr.iter().map(|e| e.y).sum();
   let scroll_delta = scroll_delta * 0.1;
@@ -115,7 +115,10 @@ fn update_camera(
     target.distance -= scroll_delta * target.distance;
     target.distance = clamp(target.distance, 0.1, 100.0);
 
-    let camera_offset = Vec3::new(0.0, 10.0, 10.0) * target.distance;
+    let looking_at = world.get_auto(program.access).loc;
+    target.looking_at = looking_at.extend(0).as_vec3();
+
+    let camera_offset = Vec3::new(0.0, -10.0, 10.0) * target.distance;
     let camera_loc = target.looking_at + camera_offset;
     *transform = Transform::from_translation(camera_loc).looking_at(target.looking_at, Vec3::Z)
         .with_scale(Vec3::splat(target.distance));
