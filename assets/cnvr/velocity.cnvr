@@ -1,5 +1,12 @@
 (define (goto x y) (event 'goto x y))
 (define (move d) (event 'move d))
+(define (stop) (event 'stop))
 (define (input-key char)
-  (set-program (move w))
+  (cond 
+    ((= char 'A) (set-program (move w)))
+    ((= char 'E) (set-program (move e)))
+    ((= char 'Comma) (set-program (move n)))
+    ((= char 'O) (set-program (move s)))
+    (else (set-program (stop)))
+  )
 )

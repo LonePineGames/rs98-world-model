@@ -20,14 +20,13 @@ fn test_program_move() {
     ..Auto::default()
   });
 
-  let mut program = ProgramSpace::new();
-  let event_handlers = get_event_handlers();
+  let mut program = ProgramSpace::new(robo);
   program.set_program(robo, p("(goto 20 20)"));
 
   let mut steps = 0;
   while steps < 100 {
     program.update(1.0);
-    program.process_events(&mut world, &event_handlers);
+    program.process_events(&mut world);
     world.update(1.0);
     assert_eq!(world.stall_message(robo), None);
     steps += 1;
@@ -58,18 +57,17 @@ fn test_input() {
     ..Auto::default()
   });
 
-  let mut program = ProgramSpace::new();
-  let event_handlers = get_event_handlers();
+  let mut program = ProgramSpace::new(robo);
   program.interrupt(robo, p("(input-key a)"));
   
   let mut steps = 0;
   while steps < 100 {
     program.update( 1.0);
-    program.process_events(&mut world, &event_handlers);
+    program.process_events(&mut world);
     world.update(1.0);
     assert_eq!(world.stall_message(robo), None);
     steps += 1;
-    if world.get_auto(robo).loc == end && world.get_auto(robo).action == Action::Stop {
+    if world.get_auto(robo).loc == end && world.get_auto(robo).action == Action::Stop && program.idle(robo) {
       break;
     }
   }
@@ -77,4 +75,21 @@ fn test_input() {
   assert_eq!(world.get_auto(robo).loc, end);
   assert_eq!(world.get_auto(robo).action, Action::Stop);
   assert_eq!(steps, 1);
+
+  program.interrupt(robo, p("(input-key e)"));
+  
+  while steps < 100 {
+    program.update( 1.0);
+    program.process_events(&mut world);
+    world.update(1.0);
+    assert_eq!(world.stall_message(robo), None);
+    steps += 1;
+    if world.get_auto(robo).loc == start && world.get_auto(robo).action == Action::Stop && program.idle(robo) {
+      break;
+    }
+  }
+  
+  assert_eq!(world.get_auto(robo).loc, start);
+  assert_eq!(world.get_auto(robo).action, Action::Stop);
+  assert_eq!(steps, 2);
 }

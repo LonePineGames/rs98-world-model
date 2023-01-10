@@ -1,10 +1,21 @@
-use bevy::{prelude::{Input, MouseButton, Res, Query, With, Camera, Vec2, GlobalTransform, ResMut}, render::camera::RenderTarget, window::Windows};
+use bevy::{prelude::*, render::camera::RenderTarget, window::Windows};
+use conniver::p;
 
-use crate::model::{world::World, auto::AutoNdx, act::Action};
+use crate::{model::{world::World, auto::AutoNdx, act::Action}, program::program::ProgramSpace};
 
 use super::camera::CameraTarget;
 
-pub fn handle_input(
+pub struct RS98InputPlugin;
+
+impl Plugin for RS98InputPlugin {
+  fn build(&self, app: &mut App) {
+    app
+      //.add_system(handle_mouse_input)
+      .add_system(handle_keyboard_input);
+  }
+}
+
+pub fn handle_mouse_input(
   buttons: Res<Input<MouseButton>>,
   mut q_camera: Query<(&Camera, &GlobalTransform), With<CameraTarget>>,
   windows: Res<Windows>,
@@ -53,5 +64,18 @@ pub fn handle_input(
     if buttons.just_pressed(MouseButton::Left) {
       world.set_auto_action(AutoNdx(1), Action::Goto(world_pos));
     }
+  }
+}
+
+
+pub fn handle_keyboard_input(
+  keys: Res<Input<KeyCode>>,
+  mut world: ResMut<World>,
+  mut program: ResMut<ProgramSpace>,
+) {
+  for key in keys.get_just_pressed() {
+    let event = p(&format!("(input-key {:?})", key));
+    let access = program.access;
+    program.interrupt(access, event);
   }
 }

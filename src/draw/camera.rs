@@ -39,7 +39,7 @@ pub fn setup_camera(
         scaling_mode: ScalingMode::FixedVertical(2.0),
         ..default()
       }.into(),
-      transform: Transform::from_xyz(-1.0, 5.0, 5.0).looking_at(Vec3::ZERO, Vec3::Z),
+      transform: Transform::from_xyz(0.0, 5.0, 5.0).looking_at(Vec3::ZERO, Vec3::Z),
       ..default()
     },
     CameraTarget {
@@ -97,25 +97,25 @@ fn update_camera(
   let rot_delta = Vec2::new(-rot_delta.x, rot_delta.y*0.2);*/
 
   for (mut transform, mut target) in q_camera.iter_mut() {
-    if keyboard_input.pressed(KeyCode::Comma) {
-      target.looking_at.y += move_delta;
-    }
-    if keyboard_input.pressed(KeyCode::O) {
-      target.looking_at.y -= move_delta;
-    }
-    if keyboard_input.pressed(KeyCode::A) {
-      target.looking_at.x -= move_delta;
-    }
-    if keyboard_input.pressed(KeyCode::E) {
-      target.looking_at.x += move_delta;
-    }
+    // if keyboard_input.pressed(KeyCode::Comma) {
+    //   target.looking_at.y += move_delta;
+    // }
+    // if keyboard_input.pressed(KeyCode::O) {
+    //   target.looking_at.y -= move_delta;
+    // }
+    // if keyboard_input.pressed(KeyCode::A) {
+    //   target.looking_at.x -= move_delta;
+    // }
+    // if keyboard_input.pressed(KeyCode::E) {
+    //   target.looking_at.x += move_delta;
+    // }
 
     // target.rotation *= Quat::from_rotation_y(rot_delta.x);
     // target.rotation *= Quat::from_rotation_x(rot_delta.y);
     target.distance -= scroll_delta * target.distance;
     target.distance = clamp(target.distance, 0.1, 100.0);
 
-    let camera_offset = Vec3::new(-1.0, 10.0, 10.0) * target.distance;
+    let camera_offset = Vec3::new(0.0, 10.0, 10.0) * target.distance;
     let camera_loc = target.looking_at + camera_offset;
     *transform = Transform::from_translation(camera_loc).looking_at(target.looking_at, Vec3::Z)
         .with_scale(Vec3::splat(target.distance));

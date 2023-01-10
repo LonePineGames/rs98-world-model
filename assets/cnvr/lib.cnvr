@@ -1,0 +1,30 @@
+
+(define (zero? x) (= 0 x))
+(define (odd? x) (= (% x 2) 1))
+(define (even? x) (= (% x 2) 0))
+
+(define print (lambda x (event 'print (apply format x))))
+(print "Hello library")
+
+(define loop (lambda x 
+  (apply do x)
+  (apply loop x)))
+
+(define cond-inner (lambda (eval-context clauses)
+  (define clause (car clauses))
+  (define condition (car clause))
+  (if clause
+    (if (= condition 'else)
+      (eval-context (car (cdr clause)))
+      (if (eval-context condition)
+        (eval-context (car (cdr clause)))
+        (cond-inner eval-context (cdr clauses))
+      )
+    )
+    ()
+  )
+))
+
+(define-syntax cond (lambda (eval-context clauses)
+  (cond-inner eval-context clauses)
+))
