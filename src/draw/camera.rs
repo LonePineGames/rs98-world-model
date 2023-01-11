@@ -1,5 +1,5 @@
 
-use bevy::{render::camera::{ScalingMode, RenderTarget}, input::mouse::MouseWheel, core_pipeline::bloom::BloomSettings, prelude::{Plugin, App, Component, Vec3, Commands, Res, Camera3dBundle, Camera, OrthographicProjection, Transform, default, DirectionalLightBundle, DirectionalLight, Color, Query, With, EventReader, Without}};
+use bevy::{render::camera::{ScalingMode, RenderTarget}, input::mouse::MouseWheel, core_pipeline::bloom::BloomSettings, prelude::{Plugin, App, Component, Vec3, Commands, Res, Camera3dBundle, Camera, OrthographicProjection, Transform, default, DirectionalLightBundle, DirectionalLight, Color, Query, With, EventReader, Without, BuildChildren}};
 
 use crate::{model::world::World, program::program::ProgramSpace};
 
@@ -29,7 +29,7 @@ pub fn setup_camera(
   rotation.mul_assign(Quat::from_rotation_x(-std::f32::consts::FRAC_PI_4));*/
 
   // camera
-  commands.spawn((
+  let camera = commands.spawn((
     Camera3dBundle {
       camera: Camera {
         hdr: true,
@@ -49,9 +49,9 @@ pub fn setup_camera(
       distance: 5.0,
     },
     BloomSettings::default()
-  ));
+  )).id();
 
-  let size = 10.0;
+  let size = 100.0;
   let shadow_projection = OrthographicProjection {
     left: -size,
     right: size,
@@ -74,11 +74,13 @@ pub fn setup_camera(
     },
     ..default()
   });
+
 }
 
 fn update_camera(
   mut q_camera: Query<(&mut Transform, &mut CameraTarget), With<Camera>>,
-  mut q_entity: Query<&mut Transform, Without<Camera>>,
+  mut q_entity: Query<&mut Transform, (Without<Camera>, Without<DirectionalLight>)>,
+  mut q_light: Query<(&mut Transform, &mut DirectionalLight), Without<Camera>>,
   // mouse_input: Res<Input<MouseButton>>,
   // mut mouse_motion: EventReader<MouseMotion>,
   mut scroll_evr: EventReader<MouseWheel>,
@@ -90,35 +92,17 @@ fn update_camera(
   let scroll_delta: f32 = scroll_evr.iter().map(|e| e.y).sum();
   let scroll_delta = scroll_delta * 0.1;
 
-  /*
-  let rot_delta = if mouse_input.pressed(MouseButton::Middle) {
-    mouse_motion.iter().map(|event| event.delta).sum::<Vec2>() * time_delta * -0.1
-  } else {
-    Vec2::ZERO
-  };
-  let rot_delta = Vec2::new(-rot_delta.x, rot_delta.y*0.2);*/
+  let mut camera_target = Vec3::ZERO;
+  let mut cam_distance = 10.0;
 
   for (mut transform, mut target) in q_camera.iter_mut() {
-    // if keyboard_input.pressed(KeyCode::Comma) {
-    //   target.looking_at.y += move_delta;
-    // }
-    // if keyboard_input.pressed(KeyCode::O) {
-    //   target.looking_at.y -= move_delta;
-    // }
-    // if keyboard_input.pressed(KeyCode::A) {
-    //   target.looking_at.x -= move_delta;
-    // }
-    // if keyboard_input.pressed(KeyCode::E) {
-    //   target.looking_at.x += move_delta;
-    // }
-
-    // target.rotation *= Quat::from_rotation_y(rot_delta.x);
-    // target.rotation *= Quat::from_rotation_x(rot_delta.y);
     target.distance -= scroll_delta * target.distance;
     target.distance = clamp(target.distance, 0.1, 100.0);
+    cam_distance = target.distance;
 
     let looking_at = world.get_auto(program.access).loc;
     target.looking_at = looking_at.extend(0).as_vec3();
+    camera_target = target.looking_at;
     let entity = entities.get(TrackedEntity::Auto(program.access));
     if let Some(entity) = entity {
       if let Ok(transform) = q_entity.get_mut(entity) {
@@ -130,6 +114,23 @@ fn update_camera(
     let camera_loc = target.looking_at + camera_offset;
     *transform = Transform::from_translation(camera_loc).looking_at(target.looking_at, Vec3::Z)
         .with_scale(Vec3::splat(target.distance));
+  }
+
+  for (mut transform, mut directional_light) in q_light.iter_mut() {
+    let size = cam_distance * 20.0;
+    let offset = Vec3::new(5.0, -3.0, 8.0);
+    let offset = offset.normalize() * (size * 0.5);
+    transform.translation = camera_target + offset;
+    //println!("size: {}", size);
+    directional_light.shadow_projection = OrthographicProjection {
+      left: -size,
+      right: size,
+      bottom: -size,
+      top: size,
+      near: -size,
+      far: size,
+      ..default()
+    };
   }
 }
 

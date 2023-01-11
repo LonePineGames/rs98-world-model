@@ -65,12 +65,16 @@ impl World {
 
   pub fn create_auto(&mut self, new: Auto) -> AutoNdx {
     let new = new.initalize();
+    let result = AutoNdx(self.autos.len());
+    if new.parent != result {
+      self.get_auto_mut(new.parent).children.push(result);
+    }
     self.autos.push(new);
-    AutoNdx(self.autos.len() - 1)
+    result
   }
 
-  pub fn get_auto_mut(&mut self, space_ndx: AutoNdx) -> &mut Auto {
-    &mut self.autos[space_ndx.0]
+  pub fn get_auto_mut(&mut self, auto_ndx: AutoNdx) -> &mut Auto {
+    &mut self.autos[auto_ndx.0]
   }
 
   pub fn set_item(&mut self, auto: AutoNdx, loc: bevy::prelude::IVec2, item: Kind) {
@@ -201,5 +205,5 @@ impl Plugin for RS98WorldPlugin {
 }
 
 pub fn update_world(mut world: ResMut<World>, time: Res<Time>) {
-  world.update(time.delta_seconds_f64());
+  world.update(time.delta_seconds_f64()*4.0);
 }

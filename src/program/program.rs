@@ -13,16 +13,23 @@ impl Plugin for RS98ProgramPlugin {
   fn build(&self, app: &mut App) {
     app
       .insert_resource(ProgramSpace::new(AutoNdx(1)))
-      .add_system(update_program);
+      .add_system(update_program)
+      .add_system(process_events);
   }
 }
 
 pub fn update_program(
   mut program: ResMut<ProgramSpace>,
-  mut world: ResMut<World>,
   time: Res<Time>,
 ) {
   program.update(time.delta_seconds_f64());
+}
+
+pub fn process_events(
+  mut program: ResMut<ProgramSpace>,
+  mut world: ResMut<World>,
+  time: Res<Time>,
+) {
   program.process_events(&mut world);
 }
 

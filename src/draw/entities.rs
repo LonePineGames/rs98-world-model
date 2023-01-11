@@ -1,8 +1,8 @@
-use std::{collections::HashMap, f32::consts::PI};
+use std::{collections::{HashMap, HashSet}, f32::consts::PI};
 
 use bevy::{prelude::*, scene::SceneBundle};
 
-use crate::model::{world::World, auto::AutoNdx, kind::Kind};
+use crate::{model::{world::World, auto::AutoNdx, kind::Kind}, program::program::ProgramSpace};
 
 #[derive(Component, PartialEq, Eq, Hash, Clone, Copy, Debug)]
 pub enum TrackedEntity {
@@ -29,7 +29,10 @@ pub fn update_entity(
 ) {
   let entity = entities.get(tracker);
   if let Some(entity) = entity {
-    if let Ok((mut transform, mut physics)) = q.get_mut(entity) {
+    if kind == Kind(0) {
+      commands.entity(entity).despawn_recursive();
+      entities.entities_map.remove(&tracker);
+    } else if let Ok((mut transform, mut physics)) = q.get_mut(entity) {
 
       let diff = loc - transform.translation;
       physics.vel = mix(physics.vel, diff*0.5, 0.2);
@@ -68,53 +71,107 @@ fn mix(vel: Vec3, diff: Vec3, arg: f32) -> Vec3 {
 pub fn update_entities(
   mut commands: Commands,
   world: Res<World>,
+  program: Res<ProgramSpace>,
   mut entities: ResMut<Entities>,
   ass: Res<AssetServer>,
   mut q: Query<(&mut Transform, &mut Physics), With<TrackedEntity>>,
   time: Res<Time>,
 ) {
+
+  let mut to_update = HashSet::new();
+
+  let access = program.access;
+  let parent_ndx = world.get_auto(access).parent;
+  let parent = world.get_auto(parent_ndx);
+  //to_update.insert(TrackedEntity::Auto(parent_ndx));
+
+  for auto_ndx in parent.children.iter() {
+    to_update.insert(TrackedEntity::Auto(*auto_ndx));
+    let auto = world.get_auto(*auto_ndx);
+    for i in 0..auto.items.len() {
+      to_update.insert(TrackedEntity::Item(*auto_ndx, i));
+    }
+  }
+
+  for (i, item) in parent.items.iter().enumerate() {
+    if *item != Kind(0) {
+      to_update.insert(TrackedEntity::Item(parent_ndx, i));
+    }
+  }
+  
+  let num_tiles = parent.tiles.len();
+  let num_tiles_to_update = num_tiles.min(20);
+  for _ in 0..num_tiles_to_update {
+    let loc = entities.tile_update;
+    to_update.insert(TrackedEntity::Tile(parent_ndx, loc));
+    to_update.insert(TrackedEntity::Item(parent_ndx, loc));
+    entities.tile_update = (entities.tile_update + 1) % num_tiles;
+  }
+
+  let existing = entities.entities_map.keys().cloned().collect::<HashSet<_>>();
+  for tracker in existing.iter() {
+    if !to_update.contains(tracker) {
+      let keep = if let TrackedEntity::Tile(tile_parent, _) = tracker {
+        tile_parent == &parent_ndx
+      } else {
+        false
+      };
+      if !keep {
+        let entity = entities.get(*tracker);
+        if let Some(entity) = entity {
+          commands.entity(entity).despawn_recursive();
+          entities.entities_map.remove(tracker);
+        }
+      }
+    }
+  }
+
+  //println!("update calls: {}, {:?}", to_update.len(), time.delta());
+
+  for tracker in to_update {
+    match tracker {
+      TrackedEntity::Auto(auto_ndx) => {
+        let auto = world.get_auto(auto_ndx);
+        let auto_loc = auto.loc.as_vec2().extend(0.0);
+        //println!("auto: {:?} {:?} {:?}/{:?}", auto.kind, auto_loc, auto_ndx, access);
+        update_entity(tracker, auto_loc, auto.kind, &mut commands, &world, &mut entities, &ass, &mut q, &time);
+      },
+      TrackedEntity::Tile(auto_ndx, loc) => {
+        let auto = world.get_auto(auto_ndx);
+        let auto_loc = auto.loc.as_vec2().extend(0.0);
+        let tile = auto.tiles[loc];
+        let loc = auto_loc + auto.ndx_to_loc(loc).as_vec2().extend(0.0);
+        update_entity(tracker, loc, tile, &mut commands, &world, &mut entities, &ass, &mut q, &time);
+      },
+      TrackedEntity::Item(auto_ndx, loc) => {
+        let auto = world.get_auto(auto_ndx);
+        let auto_loc = auto.loc.as_vec2().extend(0.0);
+        let item = auto.items[loc];
+        let loc = auto_loc + auto.ndx_to_loc(loc).as_vec2().extend(0.0);
+        update_entity(tracker, loc, item, &mut commands, &world, &mut entities, &ass, &mut q, &time);
+      },
+    }
+  }
+
+
+  /*let mut update_calls = 0;
   for (auto_ndx, auto) in world.autos.iter().enumerate() {
     let auto_ndx = AutoNdx(auto_ndx);
+    let num_tiles = auto.tiles.len();
 
     let auto_tracker = TrackedEntity::Auto(auto_ndx);
     let auto_loc = auto.loc.as_vec2().extend(0.0);
     update_entity(auto_tracker, auto_loc, auto.kind, &mut commands, &world, &mut entities, &ass, &mut q, &time);
-    // if let Some(entity) = auto_entity {
-    //   if let Ok(mut transform) = q.get_mut(entity) {
-    //     transform.translation = auto_loc;
-    //   }
-    // } else {
-    //   let auto_gltf = ass.load("model/r1000.gltf#Scene0");
-    //   let mut transform = Transform::from_translation(auto_loc);
-    //   transform.rotate(Quat::from_rotation_x(std::f32::consts::PI / 2.0));
-    //   let entity = commands.spawn((SceneBundle {
-    //       scene: auto_gltf,
-    //       transform,
-    //       ..Default::default()
-    //   }, auto_tracker)).id();
-    //   entities.set(auto_tracker, entity);
-    // }
+    update_calls += 1;
 
     // tiles
-    for (loc, tile) in auto.tiles.iter().enumerate() {
+    if num_tiles > 0 {
+      let loc = entities.tile_update;
+      let tile = auto.tiles[loc];
       let tracker = TrackedEntity::Tile(auto_ndx, loc);
       let loc = auto_loc + auto.ndx_to_loc(loc).as_vec2().extend(0.0);
-      update_entity(tracker, loc, *tile, &mut commands, &world, &mut entities, &ass, &mut q, &time);
-      // if let Some(entity) = entity {
-      //   // if let Ok(mut transform) = q.get_mut(entity) {
-      //   //   transform.translation = loc;
-      //   // }
-      // } else if *tile != Kind(0) {
-      //   let tile_gltf = ass.load("model/lab-tile.glb#Scene0");
-      //   let mut transform = Transform::from_translation(loc);
-      //   transform.rotate(Quat::from_rotation_x(std::f32::consts::PI / 2.0));
-      //   let entity = commands.spawn((SceneBundle {
-      //       scene: tile_gltf,
-      //       transform,
-      //       ..Default::default()
-      //   }, tracker)).id();
-      //   entities.set(tracker, entity);
-      // }
+      update_entity(tracker, loc, tile, &mut commands, &world, &mut entities, &ass, &mut q, &time);
+      update_calls += 1;
     }
 
     // items
@@ -122,19 +179,29 @@ pub fn update_entities(
       let tracker = TrackedEntity::Item(auto_ndx, loc);
       let loc = auto_loc + auto.ndx_to_loc(loc).as_vec2().extend(0.0);
       update_entity(tracker, loc, *item, &mut commands, &world, &mut entities, &ass, &mut q, &time);
+      update_calls += 1;
     }
+
+    entities.tile_update = if num_tiles == 0 {
+      0
+    } else {
+      (entities.tile_update + 1) % num_tiles
+    };
   }
+  println!("update calls: {}, {:?}", update_calls, time.delta());*/
 }
 
 #[derive(Resource)]
 pub struct Entities {
   pub entities_map: HashMap<TrackedEntity, Entity>,
+  pub tile_update: usize,
 }
 
 impl Entities {
   pub fn new() -> Self {
     Self {
       entities_map: HashMap::new(),
+      tile_update: 0,
     }
   }
 
