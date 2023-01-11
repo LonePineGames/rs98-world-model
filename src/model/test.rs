@@ -4,6 +4,25 @@ use bevy::prelude::IVec2;
 use crate::model::{auto::{AutoNdx, Auto}, world::World, act::Action, dir::Dir};
 
 #[test]
+fn test_move_impeded() {
+  let mut world = World::new_test();
+  let space = AutoNdx(0);
+  let start = IVec2::new(10, 10);
+  let end = IVec2::new(10, 11);
+  world.set_tile(space, end, world.kinds.get("wall"));
+  let robo = world.create_auto(Auto {
+    kind: world.kinds.get("robo"),
+    loc: start,
+    parent: space,
+    dim: IVec2::new(1, 1),
+    ..Auto::default()
+  });
+  world.set_auto_action(robo, Action::Move(Dir::North));
+  world.update(2.0);
+  assert_eq!(world.stall_message(robo), Some("Could not move to (10,11): robo cannot cross wall.".to_string()));
+}
+
+#[test]
 fn test_items_on_ground() {
   let mut world = World::new_test();
   let space = AutoNdx(0);

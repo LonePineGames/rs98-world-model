@@ -54,7 +54,7 @@ pub fn handle_mouse_input(
     // use it to convert ndc to world-space coordinates
     let world_loc = ndc_to_world.project_point3(ndc.extend(0.0));
     //println!("world_loc: {:?}", world_loc);
-    let world_pos = Vec2::new(world_loc.x - 0.5, world_loc.y + world_loc.z - 0.5);
+    let world_pos = Vec2::new(world_loc.x + 0.5, world_loc.y + world_loc.z + 0.5);
     let world_pos = IVec2::new(world_pos.x.floor() as i32, world_pos.y.floor() as i32);
 
     // convert to grid coordinates
@@ -77,7 +77,7 @@ pub fn handle_keyboard_input(
   keys: Res<Input<KeyCode>>,
   mut program: ResMut<ProgramSpace>,
 ) {
-  for key in keys.get_just_pressed() {
+  for key in keys.get_pressed() {
     let event = p(&format!("(input-key {:?})", key));
     let access = program.access;
     program.interrupt(access, event);

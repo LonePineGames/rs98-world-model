@@ -46,7 +46,7 @@ impl Kinds {
     });
     kinds.push(KindData { 
       name: "wall".to_string(),
-      scene: "".to_string(),
+      scene: "model/lab-wall.glb#Scene0".to_string(),
       traction: 5,
     });
     kinds.push(KindData { 

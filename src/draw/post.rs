@@ -18,20 +18,21 @@ use bevy::{
 };
 
 use super::app::SSPost;
-
 pub struct RS98PostPlugin;
 
 impl Plugin for RS98PostPlugin {
   fn build(&self, app: &mut App) {
     app
       .add_plugin(Material2dPlugin::<PostProcessingMaterial>::default())
-      .add_startup_system_to_stage(SSPost, setup_post);
+      .add_startup_system_to_stage(SSPost, setup_post)
+      .add_system(update_post);
   }
 }
 
 #[derive(Resource)]
 pub struct RenderImage {
   pub image: Handle<Image>,
+  pub material: Handle<PostProcessingMaterial>,
 }
 
 fn setup_post(
@@ -47,6 +48,11 @@ fn setup_post(
       height: window.physical_height(),
       ..default()
   };
+    // let size = Extent3d {
+    //     width: 800,
+    //     height: 600,
+    //     ..default()
+    // };
 
   // This is the texture that will be rendered to.
   let mut image = Image {
@@ -68,8 +74,6 @@ fn setup_post(
   image.resize(size);
 
   let image_handle = images.add(image);
-
-  commands.insert_resource(RenderImage { image: image_handle.clone() });
 
   // Main camera, first to render
   /*commands.spawn((
@@ -101,14 +105,15 @@ fn setup_post(
 
   // This material has the texture that has been rendered.
   let material_handle = post_processing_materials.add(PostProcessingMaterial {
-      source_image: image_handle,
+      source_image: image_handle.clone(),
+      time: 0.0,
   });
 
   // Post processing 2d quad, with material using the render texture done by the main camera, with a custom shader.
   commands.spawn((
       MaterialMesh2dBundle {
           mesh: quad_handle.into(),
-          material: material_handle,
+          material: material_handle.clone(),
           transform: Transform {
               translation: Vec3::new(0.0, 0.0, 1.5),
               ..default()
@@ -124,13 +129,19 @@ fn setup_post(
           camera: Camera {
               // renders after the first main camera which has default value: 0.
               priority: 1,
+              hdr: true,
               ..default()
           },
           ..Camera2dBundle::default()
       },
       post_processing_pass_layer,
-      UiCameraConfig { show_ui: false },
+      UiCameraConfig { show_ui: true },
   ));
+
+  commands.insert_resource(RenderImage { 
+    image: image_handle,
+    material: material_handle,
+  });
 }
 
 // Region below declares of the custom material handling post processing effect
@@ -138,15 +149,29 @@ fn setup_post(
 /// Our custom post processing material
 #[derive(AsBindGroup, TypeUuid, Clone)]
 #[uuid = "bc2f08eb-a0fb-43f1-a908-54871ea597d5"]
-struct PostProcessingMaterial {
+pub struct PostProcessingMaterial {
   /// In this example, this image will be the result of the main camera.
   #[texture(0)]
   #[sampler(1)]
   source_image: Handle<Image>,
+  #[uniform(2)]
+  time: f32,
 }
 
 impl Material2d for PostProcessingMaterial {
   fn fragment_shader() -> ShaderRef {
       "shaders/post.wgsl".into()
+  }
+}
+
+fn update_post(
+  mut post_processing_materials: ResMut<Assets<PostProcessingMaterial>>,
+  image: Res<RenderImage>,
+  time: Res<Time>,
+) {
+  // update the time uniform in the shader
+  let mat = post_processing_materials.get_mut(&image.material);
+  if let Some(mat) = mat {
+    mat.time = time.elapsed_seconds();
   }
 }

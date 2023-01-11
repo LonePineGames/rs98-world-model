@@ -44,7 +44,12 @@ impl World {
     for x in 0..dim.x {
       for y in 0..dim.y {
         let loc = IVec2::new(x, y);
-        let item = if x == 0 || x == dim.x - 1 || y == 0 || y == dim.y - 1 {
+        let edge = x == 0 || x == dim.x - 1 || y == 0 || y == dim.y - 1;
+        let internal_wall_x = x % 10 == 0;
+        let internal_wall_y = y % 10 == 9;
+        let door = y % 10 < 2 || (x > 20 && x < 30);
+        let internal_wall = (internal_wall_x || internal_wall_y) && !door;
+        let item = if edge || internal_wall {
           world.kinds.get("wall")
         } else {
           world.kinds.get("grass")
@@ -56,7 +61,7 @@ impl World {
     world.create_auto(Auto {
       kind: world.kinds.get("robo"),
       parent: earth,
-      loc: IVec2::new(10, 10),
+      loc: IVec2::new(25, 10),
       ..Auto::default()
     });
 
@@ -159,7 +164,7 @@ impl World {
     return auto.traction > ground.traction;
   }
 
-  fn get_tile(&self, parent: AutoNdx, pos: IVec2) -> Kind {
+  pub fn get_tile(&self, parent: AutoNdx, pos: IVec2) -> Kind {
     let parent = self.get_auto(parent);
     let ndx = parent.get_ndx(pos);
     if ndx >= 0 && ndx < parent.tiles.len() as i32 {

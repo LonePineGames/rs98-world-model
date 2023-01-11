@@ -35,11 +35,35 @@ pub fn update_entity(
     } else if let Ok((mut transform, mut physics)) = q.get_mut(entity) {
 
       let diff = loc - transform.translation;
-      physics.vel = mix(physics.vel, diff*0.5, 0.2);
-      if physics.vel.length() > 0.1 {
-        transform.translation += physics.vel * time.delta_seconds();
-        transform.rotation = Quat::from_rotation_x(PI/2.0);
-        transform.rotate(Quat::from_rotation_z((-physics.vel.x).atan2(physics.vel.y)));
+      let diff_len = diff.length();
+      if diff_len > 0.01 {
+        let diff = if diff_len < 1.0 {
+          diff * 2.0
+        } else {
+          diff.normalize() * (diff_len * diff_len * 2.0)
+        };
+        physics.vel = mix(physics.vel, diff, 0.2);
+        let vel = physics.vel;
+        if vel.length() > 0.1 {
+          let rot = (-physics.vel.x).atan2(physics.vel.y);
+          let rot = rot / PI * 6.0;
+          let rot = rot.round() / 6.0 * PI;
+          let rot_z = Quat::from_rotation_z(rot);
+          let vel = if diff_len > 0.5 {
+            rot_z.mul_vec3(Vec3::new(0.0, 1.0, 0.0)) * vel.length()
+          } else {
+            vel
+          };
+          let vel = vel * time.delta_seconds();
+          let vel = if vel.length() > diff_len * 0.5 {
+            vel.normalize() * diff_len * 0.5
+          } else {
+            vel
+          };
+          transform.translation += vel;
+          transform.rotation = Quat::from_rotation_x(PI/2.0);
+          transform.rotate(rot_z);
+        }
       }
     }
   } else if kind != Kind(0) {
