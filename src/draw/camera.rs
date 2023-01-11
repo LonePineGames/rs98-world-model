@@ -1,9 +1,9 @@
 
-use bevy::{render::camera::{ScalingMode, RenderTarget}, input::mouse::MouseWheel, core_pipeline::bloom::BloomSettings, prelude::{Plugin, App, Component, Vec3, Commands, Res, Camera3dBundle, Camera, OrthographicProjection, Transform, default, DirectionalLightBundle, DirectionalLight, Color, Query, With, EventReader}};
+use bevy::{render::camera::{ScalingMode, RenderTarget}, input::mouse::MouseWheel, core_pipeline::bloom::BloomSettings, prelude::{Plugin, App, Component, Vec3, Commands, Res, Camera3dBundle, Camera, OrthographicProjection, Transform, default, DirectionalLightBundle, DirectionalLight, Color, Query, With, EventReader, Without}};
 
 use crate::{model::world::World, program::program::ProgramSpace};
 
-use super::{post::RenderImage, app::SSCamera};
+use super::{post::RenderImage, app::SSCamera, entities::{self, TrackedEntity}};
 
 pub struct RS98CameraPlugin;
 
@@ -77,12 +77,14 @@ pub fn setup_camera(
 }
 
 fn update_camera(
-    mut q_camera: Query<(&mut Transform, &mut CameraTarget), With<Camera>>,
-    // mouse_input: Res<Input<MouseButton>>,
-    // mut mouse_motion: EventReader<MouseMotion>,
-    mut scroll_evr: EventReader<MouseWheel>,
-    world: Res<World>,
-    program: Res<ProgramSpace>,
+  mut q_camera: Query<(&mut Transform, &mut CameraTarget), With<Camera>>,
+  mut q_entity: Query<&mut Transform, Without<Camera>>,
+  // mouse_input: Res<Input<MouseButton>>,
+  // mut mouse_motion: EventReader<MouseMotion>,
+  mut scroll_evr: EventReader<MouseWheel>,
+  world: Res<World>,
+  program: Res<ProgramSpace>,
+  entities: Res<entities::Entities>,
 ) {
 
   let scroll_delta: f32 = scroll_evr.iter().map(|e| e.y).sum();
@@ -117,6 +119,12 @@ fn update_camera(
 
     let looking_at = world.get_auto(program.access).loc;
     target.looking_at = looking_at.extend(0).as_vec3();
+    let entity = entities.get(TrackedEntity::Auto(program.access));
+    if let Some(entity) = entity {
+      if let Ok(transform) = q_entity.get_mut(entity) {
+        target.looking_at = transform.translation;
+      }
+    }
 
     let camera_offset = Vec3::new(0.0, -10.0, 10.0) * target.distance;
     let camera_loc = target.looking_at + camera_offset;

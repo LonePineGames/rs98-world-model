@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::{collections::HashMap, f32::consts::PI};
 
 use bevy::{prelude::*, scene::SceneBundle};
 
@@ -11,6 +11,11 @@ pub enum TrackedEntity {
   Item(AutoNdx, usize),
 }
 
+#[derive(Component, Debug)]
+pub struct Physics {
+  pub vel: Vec3,
+}
+
 pub fn update_entity(
   tracker: TrackedEntity,
   loc: Vec3,
@@ -19,25 +24,45 @@ pub fn update_entity(
   world: &Res<World>,
   entities: &mut ResMut<Entities>,
   ass: &Res<AssetServer>,
-  q: &mut Query<&mut Transform, With<TrackedEntity>>,
+  q: &mut Query<(&mut Transform, &mut Physics), With<TrackedEntity>>,
+  time: &Res<Time>,
 ) {
   let entity = entities.get(tracker);
   if let Some(entity) = entity {
-    if let Ok(mut transform) = q.get_mut(entity) {
-      transform.translation = loc;
+    if let Ok((mut transform, mut physics)) = q.get_mut(entity) {
+
+      let diff = loc - transform.translation;
+      physics.vel = mix(physics.vel, diff*0.5, 0.2);
+      if physics.vel.length() > 0.1 {
+        transform.translation += physics.vel * time.delta_seconds();
+        transform.rotation = Quat::from_rotation_x(PI/2.0);
+        transform.rotate(Quat::from_rotation_z((-physics.vel.x).atan2(physics.vel.y)));
+      }
     }
   } else if kind != Kind(0) {
     let data = world.kinds.get_data(kind);
     let scene = ass.load(data.scene.clone());
     let mut transform = Transform::from_translation(loc);
-    transform.rotate(Quat::from_rotation_x(std::f32::consts::PI / 2.0));
-    let entity = commands.spawn((SceneBundle {
+    transform.rotate(Quat::from_rotation_x(PI/2.0));
+    let entity = commands.spawn((
+      SceneBundle {
         scene,
         transform,
         ..Default::default()
-    }, tracker)).id();
+      }, 
+      tracker,
+      Physics {
+        vel: Vec3::ZERO,
+      }
+    )).id();
     entities.set(tracker, entity);
   }
+}
+
+fn mix(vel: Vec3, diff: Vec3, arg: f32) -> Vec3 {
+  let diff = diff * arg;
+  let vel = vel * (1.0 - arg);
+  vel + diff
 }
 
 pub fn update_entities(
@@ -45,14 +70,15 @@ pub fn update_entities(
   world: Res<World>,
   mut entities: ResMut<Entities>,
   ass: Res<AssetServer>,
-  mut q: Query<&mut Transform, With<TrackedEntity>>,
+  mut q: Query<(&mut Transform, &mut Physics), With<TrackedEntity>>,
+  time: Res<Time>,
 ) {
   for (auto_ndx, auto) in world.autos.iter().enumerate() {
     let auto_ndx = AutoNdx(auto_ndx);
 
     let auto_tracker = TrackedEntity::Auto(auto_ndx);
     let auto_loc = auto.loc.as_vec2().extend(0.0);
-    update_entity(auto_tracker, auto_loc, auto.kind, &mut commands, &world, &mut entities, &ass, &mut q);
+    update_entity(auto_tracker, auto_loc, auto.kind, &mut commands, &world, &mut entities, &ass, &mut q, &time);
     // if let Some(entity) = auto_entity {
     //   if let Ok(mut transform) = q.get_mut(entity) {
     //     transform.translation = auto_loc;
@@ -73,7 +99,7 @@ pub fn update_entities(
     for (loc, tile) in auto.tiles.iter().enumerate() {
       let tracker = TrackedEntity::Tile(auto_ndx, loc);
       let loc = auto_loc + auto.ndx_to_loc(loc).as_vec2().extend(0.0);
-      update_entity(tracker, loc, *tile, &mut commands, &world, &mut entities, &ass, &mut q);
+      update_entity(tracker, loc, *tile, &mut commands, &world, &mut entities, &ass, &mut q, &time);
       // if let Some(entity) = entity {
       //   // if let Ok(mut transform) = q.get_mut(entity) {
       //   //   transform.translation = loc;
@@ -95,7 +121,7 @@ pub fn update_entities(
     for (loc, item) in auto.items.iter().enumerate() {
       let tracker = TrackedEntity::Item(auto_ndx, loc);
       let loc = auto_loc + auto.ndx_to_loc(loc).as_vec2().extend(0.0);
-      update_entity(tracker, loc, *item, &mut commands, &world, &mut entities, &ass, &mut q);
+      update_entity(tracker, loc, *item, &mut commands, &world, &mut entities, &ass, &mut q, &time);
     }
   }
 }

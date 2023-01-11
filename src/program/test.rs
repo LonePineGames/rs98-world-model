@@ -46,6 +46,7 @@ fn test_input() {
   let space = AutoNdx(0);
   let start = IVec2::new(10, 10);
   let end = IVec2::new(9, 10);
+  let elsewhere = IVec2::new(20, 20);
 
   world.set_all_tiles(space, world.kinds.get("grass"));
 
@@ -58,7 +59,7 @@ fn test_input() {
   });
 
   let mut program = ProgramSpace::new(robo);
-  program.interrupt(robo, p("(input-key a)"));
+  program.interrupt(robo, p("(input-key A)"));
   
   let mut steps = 0;
   while steps < 100 {
@@ -76,7 +77,7 @@ fn test_input() {
   assert_eq!(world.get_auto(robo).action, Action::Stop);
   assert_eq!(steps, 1);
 
-  program.interrupt(robo, p("(input-key e)"));
+  program.interrupt(robo, p("(input-key E)"));
   
   while steps < 100 {
     program.update( 1.0);
@@ -92,4 +93,21 @@ fn test_input() {
   assert_eq!(world.get_auto(robo).loc, start);
   assert_eq!(world.get_auto(robo).action, Action::Stop);
   assert_eq!(steps, 2);
+  
+  program.interrupt(robo, p("(input-mouse 20 20)"));
+  
+  while steps < 100 {
+    program.update( 1.0);
+    program.process_events(&mut world);
+    world.update(1.0);
+    assert_eq!(world.stall_message(robo), None);
+    steps += 1;
+    if world.get_auto(robo).loc == elsewhere && world.get_auto(robo).action == Action::Stop && program.idle(robo) {
+      break;
+    }
+  }
+  
+  assert_eq!(world.get_auto(robo).loc, elsewhere);
+  assert_eq!(world.get_auto(robo).action, Action::Stop);
+  assert_eq!(steps, 23);
 }
