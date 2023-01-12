@@ -17,7 +17,6 @@ pub enum Action {
 impl Action {
   pub fn act(&self, world: &mut World, auto_ndx: AutoNdx) -> Option<String> {
     let loc = world.get_auto(auto_ndx).loc;
-    println!("Action: {:?} {}x{}", self, loc.x, loc.y);
     match self {
       Action::Stop => {
         world.finish_auto_action(auto_ndx);
@@ -53,6 +52,7 @@ impl Action {
             world.set_item(parent, loc, world.kinds.nothing());
             world.set_item(auto_ndx, IVec2::new(0, 0), item);
             world.finish_auto_action(auto_ndx);
+            println!("Picked up {:?} from ground.", item);
             None
           } else {
             Some(format!("Could not find {:?} on ground.", item))

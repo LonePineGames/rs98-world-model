@@ -10,6 +10,12 @@ var our_sampler: sampler;
 @group(1) @binding(2)
 var<uniform> time: f32;
 
+fn brightness(color: vec3<f32>) -> f32 {
+  let ncolor = pow(color, vec3(2.2)); // Gamma correction
+  let result = 0.2125*ncolor.r + 0.7154*ncolor.g + 0.0721*ncolor.b;
+  return pow(result, 1.0/2.2); // Gamma correction
+}
+
 @fragment
 fn fragment(
     @builtin(position) position: vec4<f32>,
@@ -21,19 +27,27 @@ fn fragment(
     let uv_ndx = vec2<f32>(uv.x, floor(uv.y * scanlines) / scanlines);
     let offset = 0.002;
 
+    let samples0 = textureSample(texture, our_sampler, uv_ndx + vec2<f32>(-offset, 0.0));
+    let samples1 = textureSample(texture, our_sampler, uv_ndx);
+    let samples2 = textureSample(texture, our_sampler, uv_ndx + vec2<f32>(offset, 0.0));
+    let edge = length(samples1.rgb - samples0.rgb) + length(samples1.rgb - samples2.rgb);
+
     // Sample each color channel with an arbitrary shift
     var output_color = vec4<f32>(
-        textureSample(texture, our_sampler, uv_ndx + vec2<f32>(-offset, 0.0)).r,
-        textureSample(texture, our_sampler, uv_ndx + vec2<f32>(0.0, 0.0)).g,
-        textureSample(texture, our_sampler, uv_ndx + vec2<f32>(offset, 0.0)).b,
+        samples0.r,
+        samples1.g,
+        samples2.b,
         1.0
         );
     
+    output_color = pow(output_color, vec4<f32>(1.6)); // Gamma correction
+
     // Scanlines
     let scanline = abs(fract(uv.y * scanlines * 0.25) - 0.5) * 2.0 - 0.5;
     let vignet = pow(2.5 - length(uv - vec2<f32>(0.5, 0.5)) * 2.0, 1.5);
     let sync = fract(floor((uv.y - time * 0.05) * scanlines) / scanlines) * 0.2;
-    output_color = vec4<f32>(output_color.rgb * (vignet - scanline*0.5 - sync), 1.0);
+    output_color = vec4<f32>(output_color.rgb * (vignet - scanline*1.5 - sync - edge*2.0), 1.0);
+
 
     return output_color;
 }

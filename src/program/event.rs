@@ -13,6 +13,8 @@ pub fn get_event_handlers() -> HashMap<String, EventHandler> {
   let mut handlers = HashMap::<String, EventHandler>::new();
   handlers.insert("goto".to_string(), ev_goto);
   handlers.insert("move".to_string(), ev_move);
+  handlers.insert("pick".to_string(), ev_pick);
+  handlers.insert("place".to_string(), ev_place);
   handlers
 }
 
@@ -48,4 +50,16 @@ pub fn ev_move(args: Vec<Val>, program: &mut ProgramSpace, world: &mut World, nd
   let d = Dir::from_str(d);
 
   world.set_auto_action(ndx, Action::Move(d));
+}
+
+pub fn ev_pick(args: Vec<Val>, program: &mut ProgramSpace, world: &mut World, ndx: AutoNdx) {
+  println!("ev_pick: {:?}", args);
+
+  world.set_auto_action(ndx, Action::Pick(world.kinds.nothing(), world.kinds.nothing()));
+}
+
+pub fn ev_place(args: Vec<Val>, program: &mut ProgramSpace, world: &mut World, ndx: AutoNdx) {
+  println!("ev_place: {:?}", args);
+
+  world.set_auto_action(ndx, Action::Place(world.kinds.nothing()));
 }

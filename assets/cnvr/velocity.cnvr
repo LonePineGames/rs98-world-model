@@ -1,12 +1,16 @@
 (define (goto x y) (event 'goto x y))
 (define (move d) (event 'move d))
 (define (stop) (event 'stop))
+(define (pick) (event 'pick))
+(define (place) (event 'place))
+
 (define (input-key char)
   (cond 
     ((= char 'A) (set-program '(move w)))
     ((= char 'E) (set-program '(move e)))
     ((= char 'Comma) (set-program '(move n)))
     ((= char 'O) (set-program '(move s)))
+    ((= char 'Period) (set-program '(pick)))
     (else (set-program '(stop)))
   )
 )

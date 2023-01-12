@@ -28,44 +28,59 @@ pub fn update_entity(
   time: &Res<Time>,
 ) {
   let entity = entities.get(tracker);
+
+  let parent = match tracker {
+    TrackedEntity::Auto(auto) => world.get_auto(auto).parent,
+    TrackedEntity::Tile(auto, _) => auto,
+    TrackedEntity::Item(auto, _) => auto,
+  };
+  let parent_entity = entities.get(TrackedEntity::Auto(parent));
+
   if let Some(entity) = entity {
     if kind == Kind(0) {
       commands.entity(entity).despawn_recursive();
       entities.entities_map.remove(&tracker);
+
     } else if let Ok((mut transform, mut physics)) = q.get_mut(entity) {
 
-      let diff = loc - transform.translation;
-      let diff_len = diff.length();
-      if diff_len > 0.01 {
-        let diff = if diff_len < 1.0 {
-          diff * 2.0
-        } else {
-          diff.normalize() * (diff_len * diff_len * 2.0)
-        };
-        physics.vel = mix(physics.vel, diff, 0.2);
-        let vel = physics.vel;
-        if vel.length() > 0.1 {
-          let rot = (-physics.vel.x).atan2(physics.vel.y);
-          let rot = rot / PI * 6.0;
-          let rot = rot.round() / 6.0 * PI;
-          let rot_z = Quat::from_rotation_z(rot);
-          let vel = if diff_len > 0.5 {
-            rot_z.mul_vec3(Vec3::new(0.0, 1.0, 0.0)) * vel.length()
+      if let TrackedEntity::Auto(_) = tracker {
+        let diff = loc - transform.translation;
+        let diff_len = diff.length();
+        if diff_len > 0.01 {
+          let diff = if diff_len < 1.0 {
+            diff * 2.0
           } else {
-            vel
+            diff.normalize() * (diff_len * diff_len * 2.0)
           };
-          let vel = vel * time.delta_seconds();
-          let vel = if vel.length() > diff_len * 0.5 {
-            vel.normalize() * diff_len * 0.5
-          } else {
-            vel
-          };
-          transform.translation += vel;
-          transform.rotation = Quat::from_rotation_x(PI/2.0);
-          transform.rotate(rot_z);
+          physics.vel = mix(physics.vel, diff, 0.2);
+          let vel = physics.vel;
+          if vel.length() > 0.1 {
+            let rot = (-physics.vel.x).atan2(physics.vel.y);
+            let rot = rot / PI * 6.0;
+            let rot = rot.round() / 6.0 * PI;
+            let rot_z = Quat::from_rotation_z(rot);
+            let vel = if diff_len > 0.5 {
+              rot_z.mul_vec3(Vec3::new(0.0, 1.0, 0.0)) * vel.length()
+            } else {
+              diff
+            };
+            let vel = vel * time.delta_seconds();
+            let vel = if vel.length() > diff_len * 0.5 {
+              vel.normalize() * diff_len * 0.5
+            } else {
+              vel
+            };
+            transform.translation += vel;
+            transform.rotation = Quat::from_rotation_x(PI/2.0);
+            transform.rotate(rot_z);
+          }
         }
+
+      } else {
+        transform.translation = loc;
       }
     }
+
   } else if kind != Kind(0) {
     let data = world.kinds.get_data(kind);
     let scene = ass.load(data.scene.clone());
@@ -82,6 +97,11 @@ pub fn update_entity(
         vel: Vec3::ZERO,
       }
     )).id();
+
+    if let Some(parent_entity) = parent_entity {
+      commands.entity(entity).set_parent(parent_entity);
+    }
+
     entities.set(tracker, entity);
   }
 }
@@ -108,11 +128,15 @@ pub fn update_entities(
   let parent_ndx = world.get_auto(access).parent;
   let parent = world.get_auto(parent_ndx);
   //to_update.insert(TrackedEntity::Auto(parent_ndx));
+  // println!("access items: {:?} {:?}", access, world.get_auto(access).items);
 
   for auto_ndx in parent.children.iter() {
     to_update.insert(TrackedEntity::Auto(*auto_ndx));
     let auto = world.get_auto(*auto_ndx);
     for i in 0..auto.items.len() {
+      // if auto.items[i] != Kind(0) || auto_ndx == &access {
+      //   println!("update item {} {:?} {:?}", i, auto_ndx, auto.items[i]);
+      // }
       to_update.insert(TrackedEntity::Item(*auto_ndx, i));
     }
   }
@@ -171,7 +195,10 @@ pub fn update_entities(
         let auto = world.get_auto(auto_ndx);
         let auto_loc = auto.loc.as_vec2().extend(0.0);
         let item = auto.items[loc];
-        let loc = auto_loc + auto.ndx_to_loc(loc).as_vec2().extend(0.0);
+        let loc = auto.ndx_to_loc(loc).as_vec2().extend(0.0);
+        // if item != Kind(0) {
+        //   println!("item: {:?} {:?} {:?}/{:?}", item, loc, auto_ndx, access);
+        // }
         update_entity(tracker, loc, item, &mut commands, &world, &mut entities, &ass, &mut q, &time);
       },
     }
@@ -244,8 +271,50 @@ impl Plugin for RS98EntitiesPlugin {
   fn build(&self, app: &mut App) {
     app
       .insert_resource(Entities::new())
-      .add_system(update_entities);
+      .add_system(update_entities)
+      //.add_system(read_holding_points)
+      ;
   }
 }
 
+pub fn read_holding_points(
+  mut ev_tex: EventReader<AssetEvent<Scene>>,
+  mut assets: ResMut<Assets<Scene>>,
+  mut asset_server: ResMut<AssetServer>,
+  world: Res<World>,
+) {
+  for ev in ev_tex.iter() {
+    match ev {
+      AssetEvent::Created { handle } => {
+        let scene = assets.get_mut(handle);
+        if let Some(scene) = scene {
+        }
+      }
+      AssetEvent::Modified { .. } => {
+      }
+      AssetEvent::Removed { .. } => { }
+    }
+  }
 
+  for kind in world.kinds.kinds.iter() {
+    let file = &kind.scene;
+    let handle = asset_server.load(file);
+    let scene = assets.get_mut(&handle);
+    if let Some(scene) = scene {
+      // get the GltfPrimitive 
+
+      // let mut holding_points = Vec::new();
+      // for node in scene.nodes.iter() {
+      //   if let Some(name) = &node.name {
+      //     if name.starts_with("holding_point") {
+      //       if let Some(transform) = &node.transform {
+      //         holding_points.push(transform.translation);
+      //       }
+      //     }
+      //   }
+      // }
+      // println!("holding points: {:?}", holding_points);
+    }
+  }
+
+}

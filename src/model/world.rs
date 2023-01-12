@@ -45,9 +45,9 @@ impl World {
       for y in 0..dim.y {
         let loc = IVec2::new(x, y);
         let edge = x == 0 || x == dim.x - 1 || y == 0 || y == dim.y - 1;
-        let internal_wall_x = x % 10 == 0;
+        let internal_wall_x = x % 20 == 0;
         let internal_wall_y = y % 10 == 9;
-        let door = y % 10 < 2 || (x > 20 && x < 30);
+        let door = y % 20 < 2 || y % 20 > 17 || (x > 20 && x < 30);
         let internal_wall = (internal_wall_x || internal_wall_y) && !door;
         let item = if edge || internal_wall {
           world.kinds.get("wall")
@@ -61,15 +61,24 @@ impl World {
     world.create_auto(Auto {
       kind: world.kinds.get("robo"),
       parent: earth,
-      loc: IVec2::new(25, 10),
+      loc: IVec2::new(2, 1),
       ..Auto::default()
     });
+
+    // world.create_auto(Auto {
+    //   kind: world.kinds.get("table"),
+    //   parent: earth,
+    //   loc: IVec2::new(2, 6),
+    //   ..Auto::default()
+    // });
+
+    world.set_item(earth, IVec2::new(3, 2), world.kinds.get("rock"));
 
     world
   }
 
   pub fn create_auto(&mut self, new: Auto) -> AutoNdx {
-    let new = new.initalize();
+    let new = new.initalize(&self.kinds);
     let result = AutoNdx(self.autos.len());
     if new.parent != result {
       self.get_auto_mut(new.parent).children.push(result);
@@ -130,6 +139,10 @@ impl World {
       let stall_message = action.act(self, ndx);
       let auto = self.get_auto_mut(ndx);
       auto.stall_message = stall_message;
+      let auto = self.get_auto(ndx);
+      if let Some(message) = &auto.stall_message {
+        println!("{}: {}", self.kinds.get_data(auto.kind).name, message);
+      }
     }
   }
 

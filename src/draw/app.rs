@@ -15,6 +15,10 @@ pub fn start_app() {
     App::new()
         .add_startup_stage(SSPost, SystemStage::parallel())
         .add_startup_stage_after(SSPost, SSCamera, SystemStage::parallel())
+        // .add_plugin(AssetPlugin {
+        //     watch_for_changes: true,
+        //     ..default()
+        // })
         .add_plugins(DefaultPlugins)
         .add_plugin(RS98WorldPlugin)
         .add_plugin(RS98ProgramPlugin)

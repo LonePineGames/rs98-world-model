@@ -65,10 +65,10 @@ pub fn setup_camera(
 
   // light
   commands.spawn(DirectionalLightBundle {
-    transform: Transform::from_xyz(5.0, -3.0, 8.0).looking_at(Vec3::ZERO, Vec3::Z),
+    transform: Transform::from_xyz(5.0, -5.0, 10.0).looking_at(Vec3::ZERO, Vec3::Z),
     directional_light: DirectionalLight {
-      color: Color::rgb(0.9, 1.0, 1.0),
-      illuminance: 5000.0,
+      color: Color::rgb(1.0, 1.0, 1.0),
+      illuminance: 10000.0,
       shadows_enabled: true,
       shadow_projection,
       ..default()
@@ -76,7 +76,7 @@ pub fn setup_camera(
     ..default()
   });
 
-  commands.insert_resource(ClearColor(Color::rgb(0.1, 0.1, 0.2)));
+  commands.insert_resource(ClearColor(Color::rgb(0.02, 0.02, 0.1)));
 
 }
 
@@ -104,7 +104,7 @@ fn update_camera(
     cam_distance = target.distance;
 
     let looking_at = world.get_auto(program.access).loc;
-    target.looking_at = looking_at.extend(0).as_vec3();
+    target.looking_at = looking_at.as_vec2().extend(2.0);
     camera_target = target.looking_at;
     let entity = entities.get(TrackedEntity::Auto(program.access));
     if let Some(entity) = entity {
@@ -113,7 +113,7 @@ fn update_camera(
       }
     }
 
-    let camera_offset = Vec3::new(0.0, -10.0, 10.0) * target.distance;
+    let camera_offset = Vec3::new(1.0, -10.0, 10.0) * target.distance;
     let camera_loc = target.looking_at + camera_offset;
     *transform = Transform::from_translation(camera_loc).looking_at(target.looking_at, Vec3::Z)
         .with_scale(Vec3::splat(target.distance));
@@ -121,7 +121,7 @@ fn update_camera(
 
   for (mut transform, mut directional_light) in q_light.iter_mut() {
     let size = cam_distance * 20.0;
-    let offset = Vec3::new(5.0, -3.0, 8.0);
+    let offset = Vec3::new(5.0, -5.0, 10.0);
     let offset = offset.normalize() * (size * 0.5);
     transform.translation = camera_target + offset;
     //println!("size: {}", size);

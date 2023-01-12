@@ -52,10 +52,15 @@ pub fn handle_mouse_input(
     let ndc_to_world = camera_matrixes.compute_matrix() * camera.projection_matrix().inverse();
 
     // use it to convert ndc to world-space coordinates
-    let world_loc = ndc_to_world.project_point3(ndc.extend(0.0));
+    let world_loc0 = ndc_to_world.project_point3(ndc.extend(0.0));
+    let world_loc1 = ndc_to_world.project_point3(ndc.extend(1.0));
+    let z_lerp = world_loc0.z / (world_loc0.z - world_loc1.z);
+    let world_loc = world_loc0.lerp(world_loc1, z_lerp);
+    let world_loc = world_loc + Vec3::new(0.5, 0.5, 0.0);
+    let world_pos = world_loc.as_ivec3().truncate();
     //println!("world_loc: {:?}", world_loc);
-    let world_pos = Vec2::new(world_loc.x + 0.5, world_loc.y + world_loc.z + 0.5);
-    let world_pos = IVec2::new(world_pos.x.floor() as i32, world_pos.y.floor() as i32);
+    // let world_pos = Vec2::new(world_loc.x + 0.5, world_loc.y + world_loc.z + 0.5);
+    // let world_pos = IVec2::new(world_pos.x.floor() as i32, world_pos.y.floor() as i32);
 
     // convert to grid coordinates
     //let world_pos = world_loc.as_ivec3().truncate();

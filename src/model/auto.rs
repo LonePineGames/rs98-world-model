@@ -2,6 +2,8 @@ use bevy::prelude::IVec2;
 
 use crate::model::{kind::Kind, act::Action};
 
+use super::kind::Kinds;
+
 #[derive(Clone, Default)]
 pub struct Auto {
   pub kind: Kind,
@@ -47,8 +49,12 @@ impl Auto {
     loc.x + loc.y * self.dim.x
   }
 
-  pub fn initalize(&self) -> Auto {
+  pub fn initalize(&self, kinds: &Kinds) -> Auto {
     let mut new = self.clone();
+    let kind_data = kinds.get_data(new.kind);
+    if new.dim.x == 0 || new.dim.y == 0 {
+      new.dim = kind_data.item_dim;
+    }
     new.alive = true;
     let num_items = (new.dim.x * new.dim.y) as usize;
     if new.items.len() < num_items {
