@@ -22,20 +22,23 @@ pub struct CameraTarget {
 
 pub fn setup_camera(
   mut commands: Commands,
-  render_image: Res<RenderImage>,
+  render_image: Option<Res<RenderImage>>,
 ) {
   /*// initial rotation
   let mut rotation = Quat::from_rotation_y(-std::f32::consts::FRAC_PI_4);
   rotation.mul_assign(Quat::from_rotation_x(-std::f32::consts::FRAC_PI_4));*/
 
   // camera
+  let mut camera = Camera {
+    hdr: true,
+    ..default()
+  };
+  if let Some(render_image) = render_image {
+    camera.target = RenderTarget::Image(render_image.image.clone());
+  }
   commands.spawn((
     Camera3dBundle {
-      camera: Camera {
-        hdr: true,
-        target: RenderTarget::Image(render_image.image.clone()),
-        ..default()
-      },
+      camera,
       projection: OrthographicProjection {
         scale: 3.0,
         scaling_mode: ScalingMode::FixedVertical(2.0),
