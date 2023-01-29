@@ -17,6 +17,7 @@ pub enum Action {
 impl Action {
   pub fn act(&self, world: &mut World, auto_ndx: AutoNdx) -> Option<String> {
     let loc = world.get_auto(auto_ndx).loc;
+    println!("Action: {:?} {}x{}", self, loc.x, loc.y);
     match self {
       Action::Stop => {
         world.finish_auto_action(auto_ndx);

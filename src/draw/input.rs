@@ -70,7 +70,7 @@ pub fn handle_mouse_input(
 
     if buttons.just_pressed(MouseButton::Left) {
       let event = p(&format!("(input-mouse {} {})", world_pos.x, world_pos.y));
-      //println!("event: {:?}", event);
+      println!("event: {:?}", event);
       let access = program.access;
       program.interrupt(access, event);
     }

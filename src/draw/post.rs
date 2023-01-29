@@ -174,4 +174,6 @@ fn update_post(
   if let Some(mat) = mat {
     mat.time = time.elapsed_seconds();
   }
+
+  println!("frame {}ms ({:.2}fps)", time.delta_seconds() * 1000.0, time.delta_seconds().recip())
 }

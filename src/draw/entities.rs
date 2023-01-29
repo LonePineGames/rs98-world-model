@@ -46,7 +46,7 @@ pub fn update_entity(
       if let TrackedEntity::Auto(_) = tracker {
         let diff = loc - transform.translation;
         let diff_len = diff.length();
-        if diff_len > 0.01 {
+        if diff_len > 0.2 {
           let diff = if diff_len < 1.0 {
             diff * 2.0
           } else {
@@ -192,14 +192,14 @@ pub fn update_entities(
         update_entity(tracker, loc, tile, &mut commands, &world, &mut entities, &ass, &mut q, &time);
       },
       TrackedEntity::Item(auto_ndx, loc) => {
-        let auto = world.get_auto(auto_ndx);
-        let auto_loc = auto.loc.as_vec2().extend(0.0);
-        let item = auto.items[loc];
-        let loc = auto.ndx_to_loc(loc).as_vec2().extend(0.0);
-        // if item != Kind(0) {
-        //   println!("item: {:?} {:?} {:?}/{:?}", item, loc, auto_ndx, access);
-        // }
-        update_entity(tracker, loc, item, &mut commands, &world, &mut entities, &ass, &mut q, &time);
+        // let auto = world.get_auto(auto_ndx);
+        // let auto_loc = auto.loc.as_vec2().extend(0.0);
+        // let item = auto.items[loc];
+        // let loc = auto.ndx_to_loc(loc).as_vec2().extend(0.0);
+        // // if item != Kind(0) {
+        // //   println!("item: {:?} {:?} {:?}/{:?}", item, loc, auto_ndx, access);
+        // // }
+        // update_entity(tracker, loc, item, &mut commands, &world, &mut entities, &ass, &mut q, &time);
       },
     }
   }
