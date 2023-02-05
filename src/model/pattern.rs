@@ -12,6 +12,10 @@ pub struct Patterns {
 }
 
 impl Patterns {
+  pub fn new_blank(kinds: &Kinds) -> Patterns {
+    Patterns { patterns: vec![] }
+  }
+
   pub fn new_test(kinds: &Kinds) -> Patterns {
     Patterns {
       patterns: vec![

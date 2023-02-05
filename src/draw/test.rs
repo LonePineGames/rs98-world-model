@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::{model::{world::World, auto::{AutoNdx}}, draw::entities::{update_entities}};
+use crate::{model::{world::World, auto::{AutoNdx}}, draw::entities::{update_entities}, program::program::ProgramSpace};
 
 use super::entities::Entities;
 
@@ -19,6 +19,8 @@ fn test_entities() {
   app.add_plugin(AssetPlugin::default());
   app.insert_resource(world);
   app.insert_resource(entities);
+  app.insert_resource(ProgramSpace::new(space));
+  app.insert_resource(Time::default());
   app.add_system(update_entities);
 
   app.update();

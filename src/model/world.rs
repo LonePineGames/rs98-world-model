@@ -11,6 +11,16 @@ pub struct World {
 }
 
 impl World {
+  pub fn new_blank() -> World {
+    let kinds = Kinds::new_blank();
+    let mut world = World {
+      patterns: Patterns::new_blank(&kinds),
+      kinds,
+      autos: vec![],
+    };
+    world
+  }
+
   pub fn new_test() -> World {
     let kinds = Kinds::new_test();
     let mut world = World {

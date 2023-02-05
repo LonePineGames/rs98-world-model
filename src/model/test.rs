@@ -1,5 +1,6 @@
 
 use bevy::prelude::IVec2;
+use conniver::{State, p};
 
 use crate::model::{auto::{AutoNdx, Auto}, world::World, act::Action, dir::Dir};
 
@@ -38,6 +39,7 @@ fn test_items_on_ground() {
 fn test_pick_place() {
   let mut world = World::new_test();
   let space = AutoNdx(0);
+  world.set_all_tiles(space, world.kinds.get("grass"));
   let loc = IVec2::new(10, 10);
   let rock = world.kinds.get("rock");
   world.set_item(space, loc, rock);
@@ -252,4 +254,69 @@ fn test_fire() {
 
   assert_eq!(world.stall_message(robo1), Some("Target out of range.".to_string()));
   assert_eq!(world.get_auto(robo3).alive, true);
+}
+
+#[test]
+fn test_load_kinds() {
+  let mut world = World::new_blank();
+  
+  world.kinds.set_by_val(p("(
+    (name nothing)
+    (traction 10)
+  )"));
+
+  world.kinds.set_by_val(p("(
+    (name missingno)
+    (traction 1)
+  )"));
+
+  world.kinds.set_by_val(p("(
+    (name robo)
+    (traction 0)
+    (dim 1 1)
+    (scene \"model/r1000.glb#Scene0\")
+  )"));
+
+  let nothing = world.kinds.get("nothing");
+  assert_eq!(nothing.0, 0);
+  let nothing = world.kinds.get_data(nothing);
+  assert_eq!(nothing.name, "nothing");
+  assert_eq!(nothing.traction, 10);
+  assert_eq!(nothing.item_dim, IVec2::new(0, 0));
+  assert_eq!(nothing.scene, "");
+
+  let missingno = world.kinds.get("missingno");
+  assert_eq!(missingno.0, 1);
+
+  let robo = world.kinds.get("robo");
+  let robo_data = world.kinds.get_data(robo);
+  assert_eq!(robo_data.name, "robo");
+  assert_eq!(robo_data.traction, 0);
+  assert_eq!(robo_data.item_dim, IVec2::new(1, 1));
+  assert_eq!(robo_data.scene, "model/r1000.glb#Scene0");
+  
+  let robot = world.create_auto(Auto {
+    kind: robo,
+    loc: IVec2::new(0, 0),
+    parent: AutoNdx(0),
+    ..Auto::default()
+  });
+
+  let robo_data = world.get_auto(robot);
+  assert_eq!(robo_data.kind, robo);
+  assert_eq!(robo_data.loc, IVec2::new(0, 0));
+  assert_eq!(robo_data.parent, AutoNdx(0));
+  assert_eq!(robo_data.dim, IVec2::new(1, 1));
+
+  world.kinds.set_by_val(p("(
+    (name missingno)
+    (dim 2 2)
+  )"));
+  let missingno = world.kinds.get("missingno");
+  assert_eq!(missingno.0, 1);
+  let missingno = world.kinds.get_data(missingno);
+  assert_eq!(missingno.name, "missingno");
+  assert_eq!(missingno.traction, 1);
+  assert_eq!(missingno.item_dim, IVec2::new(2, 2));
+
 }
