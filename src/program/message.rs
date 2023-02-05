@@ -41,5 +41,10 @@ pub fn get_message_handlers() -> HashMap<String, MessageHandler> {
     Some(Val::String(item_name))
   });
 
+  handlers.insert("print".to_string(), |args, _, _, _| {
+    println!("print: {:?}", args[1..].iter().map(|v| v.to_string()).collect::<Vec<String>>().join(""));
+    None
+  });
+
   handlers
 }

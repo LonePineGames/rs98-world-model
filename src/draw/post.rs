@@ -135,7 +135,7 @@ fn setup_post(
           ..Camera2dBundle::default()
       },
       post_processing_pass_layer,
-      UiCameraConfig { show_ui: true },
+      UiCameraConfig { show_ui: false },
   ));
 
   commands.insert_resource(RenderImage { 

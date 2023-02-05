@@ -65,12 +65,12 @@ impl World {
       ..Auto::default()
     });
 
-    // world.create_auto(Auto {
-    //   kind: world.kinds.get("table"),
-    //   parent: earth,
-    //   loc: IVec2::new(2, 6),
-    //   ..Auto::default()
-    // });
+    world.create_auto(Auto {
+      kind: world.kinds.get("table"),
+      parent: earth,
+      loc: IVec2::new(2, 6),
+      ..Auto::default()
+    });
 
     world.set_item(earth, IVec2::new(3, 2), world.kinds.get("rock"));
 

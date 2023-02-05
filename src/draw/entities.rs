@@ -71,8 +71,7 @@ pub fn update_entity(
               vel
             };
             transform.translation += vel;
-            transform.rotation = Quat::from_rotation_x(PI/2.0);
-            transform.rotate(rot_z);
+            transform.rotation = rot_z;
           }
         }
 
@@ -85,7 +84,7 @@ pub fn update_entity(
     let data = world.kinds.get_data(kind);
     let scene = ass.load(data.scene.clone());
     let mut transform = Transform::from_translation(loc);
-    transform.rotate(Quat::from_rotation_x(PI/2.0));
+    //transform.rotate(Quat::from_rotation_x(PI/2.0));
     let entity = commands.spawn((
       SceneBundle {
         scene,
@@ -192,14 +191,15 @@ pub fn update_entities(
         update_entity(tracker, loc, tile, &mut commands, &world, &mut entities, &ass, &mut q, &time);
       },
       TrackedEntity::Item(auto_ndx, loc) => {
-        // let auto = world.get_auto(auto_ndx);
-        // let auto_loc = auto.loc.as_vec2().extend(0.0);
-        // let item = auto.items[loc];
-        // let loc = auto.ndx_to_loc(loc).as_vec2().extend(0.0);
-        // // if item != Kind(0) {
-        // //   println!("item: {:?} {:?} {:?}/{:?}", item, loc, auto_ndx, access);
-        // // }
-        // update_entity(tracker, loc, item, &mut commands, &world, &mut entities, &ass, &mut q, &time);
+        let auto = world.get_auto(auto_ndx);
+        let auto_loc = auto.loc.as_vec2().extend(0.0);
+        let item = auto.items[loc];
+        let loc = auto.ndx_to_loc(loc).as_vec2().extend(0.0);
+        let loc = loc + Vec3::new(0.0, -0.5, 0.5);
+        // if item != Kind(0) {
+        //   println!("item: {:?} {:?} {:?}/{:?}", item, loc, auto_ndx, access);
+        // }
+        update_entity(tracker, loc, item, &mut commands, &world, &mut entities, &ass, &mut q, &time);
       },
     }
   }

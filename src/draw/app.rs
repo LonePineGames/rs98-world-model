@@ -1,4 +1,4 @@
-use bevy::prelude::*;
+use bevy::{prelude::*, window::{CompositeAlphaMode, PresentMode, CursorGrabMode}};
 use bevy_inspector_egui::quick::WorldInspectorPlugin;
 
 use crate::model::world::RS98WorldPlugin;
@@ -20,8 +20,19 @@ pub fn start_app() {
         //     watch_for_changes: true,
         //     ..default()
         // })
-        .add_plugins(DefaultPlugins)
-        .add_plugin(WorldInspectorPlugin)
+        .add_plugins(DefaultPlugins.set(WindowPlugin {
+
+            window: WindowDescriptor {
+                title: "Robopocalypse Simulator 98".to_string(),
+                mode: WindowMode::Fullscreen,
+                present_mode: PresentMode::Immediate,
+                cursor_visible: true,
+                //cursor_grab_mode: CursorGrabMode::Confined,
+                ..default()
+            },
+            ..default()
+        }))
+        //.add_plugin(WorldInspectorPlugin)
         .add_plugin(RS98WorldPlugin)
         .add_plugin(RS98ProgramPlugin)
         .add_plugin(RS98InputPlugin)
@@ -29,6 +40,7 @@ pub fn start_app() {
         .add_plugin(RS98CameraPlugin)
         .add_plugin(RS98TextPlugin)
         .add_plugin(RS98EntitiesPlugin)
+
 
         .run();
 }
