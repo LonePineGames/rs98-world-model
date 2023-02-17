@@ -1,13 +1,12 @@
 use bevy::prelude::IVec2;
 use conniver::p;
 
-use crate::{model::{world::World, auto::{AutoNdx, Auto}, act::Action, kind::Kind}, program::{program::ProgramSpace, event::get_event_handlers}};
+use crate::{model::{world::World, auto::{AutoNdx, Auto}, act::Action, kind::Kind, dir::Dir}, program::{program::ProgramSpace}};
 
 fn run100(world: &mut World, program: &mut ProgramSpace, robo: AutoNdx, expected_steps: usize) {
   let mut steps = 0;
-  while steps < 100 && (!program.idle(robo) || world.get_auto(robo).action != Action::Stop) {
+  while steps < 100 && (!program.idle(robo) || (world.get_auto(robo).action != Action::Stop && !world.get_auto(robo).action_finished)) {
     program.update(1.0);
-    program.process_events(world);
     program.process_messages(world);
     world.update(1.0);
     assert_eq!(world.stall_message(robo), None);
@@ -36,7 +35,7 @@ fn test_program_move() {
   let mut program = ProgramSpace::new(robo);
 
   program.set_program(robo, p("(goto 20 20)"));
-  run100(&mut world, &mut program, robo, 21);
+  run100(&mut world, &mut program, robo, 22);
   assert_eq!(world.get_auto(robo).loc, end);
   assert_eq!(world.get_auto(robo).action, Action::Stop);
 }
@@ -62,17 +61,17 @@ fn test_input() {
   let mut program = ProgramSpace::new(robo);
 
   program.interrupt(robo, p("(input-key A)"));
-  run100(&mut world, &mut program, robo, 1);
+  run100(&mut world, &mut program, robo, 2);
   assert_eq!(world.get_auto(robo).loc, end);
   assert_eq!(world.get_auto(robo).action, Action::Stop);
 
   program.interrupt(robo, p("(input-key E)"));
-  run100(&mut world, &mut program, robo, 1);
+  run100(&mut world, &mut program, robo, 2);
   assert_eq!(world.get_auto(robo).loc, start);
   assert_eq!(world.get_auto(robo).action, Action::Stop);
   
   program.interrupt(robo, p("(input-mouse 20 20)"));
-  run100(&mut world, &mut program, robo, 21);
+  run100(&mut world, &mut program, robo, 22);
   assert_eq!(world.get_auto(robo).loc, elsewhere);
   assert_eq!(world.get_auto(robo).action, Action::Stop);
 }
@@ -100,13 +99,13 @@ fn test_input_pick_place() {
   let mut program = ProgramSpace::new(robo);
   
   program.interrupt(robo, p("(input-key Period)"));
-  run100(&mut world, &mut program, robo, 2);
+  run100(&mut world, &mut program, robo, 3);
   assert_eq!(world.get_item(robo, hand), rock);
   assert_eq!(world.get_item(space, start), Kind(0));
   assert_eq!(world.get_auto(robo).action, Action::Stop);
 
   program.interrupt(robo, p("(input-key Period)"));
-  run100(&mut world, &mut program, robo, 2);
+  run100(&mut world, &mut program, robo, 3);
   assert_eq!(world.get_item(robo, hand), Kind(0));
   assert_eq!(world.get_auto(robo).loc, start);
   assert_eq!(world.get_auto(robo).action, Action::Stop);

@@ -5,7 +5,7 @@ use conniver::{Val, State, eval_s, p};
 
 use crate::model::{auto::AutoNdx, world::World};
 
-use super::{event::{EventHandler, get_event_handlers}, message::{MessageHandler, get_message_handlers}};
+use super::message::{MessageHandler, get_message_handlers};
 
 pub struct RS98ProgramPlugin;
 
@@ -14,7 +14,6 @@ impl Plugin for RS98ProgramPlugin {
     app
       .insert_resource(ProgramSpace::new(AutoNdx(1)))
       .add_system(update_program)
-      .add_system(process_events)
       .add_system(process_messages)
       ;
   }
@@ -25,14 +24,6 @@ pub fn update_program(
   time: Res<Time>,
 ) {
   program.update(time.delta_seconds_f64());
-}
-
-pub fn process_events(
-  mut program: ResMut<ProgramSpace>,
-  mut world: ResMut<World>,
-  time: Res<Time>,
-) {
-  program.process_events(&mut world);
 }
 
 pub fn process_messages(
@@ -48,7 +39,6 @@ pub struct ProgramSpace {
   procs: Vec<State>,
   proto: State,
   pub access: AutoNdx,
-  event_handlers: HashMap<String, EventHandler>,
   message_handlers: HashMap<String, MessageHandler>,
 }
 
@@ -66,7 +56,6 @@ impl ProgramSpace {
       procs: Vec::new(),
       proto,
       access,
-      event_handlers: get_event_handlers(),
       message_handlers,
     }
   }
@@ -94,24 +83,6 @@ impl ProgramSpace {
         println!("running");
         state.run();
       }
-    }
-  }
-
-  pub fn process_events(&mut self, world: &mut World) {
-    let mut events = vec![];
-    for (ndx, state) in self.procs.iter_mut().enumerate() {
-      let ndx = AutoNdx(ndx);
-      if let Some(Val::List(event)) = state.take_event() {
-        if let Some(Val::Sym(event_name)) = event.get(0) {
-          if let Some(handler) = self.event_handlers.get(event_name) {
-            events.push((event, *handler, ndx));
-          }
-        }
-      }
-    }
-
-    for (event, handler, ndx) in events {
-      handler(event, self, world, ndx);
     }
   }
 
