@@ -83,26 +83,6 @@ fn fragment(
     let samples0 = samples0 / 9.0;
     output_color = mix(output_color, samples0, clamp(border, 0.0, 1.0));
 
-    // var output_color = vec4<f32>(
-    //     samples09.r,
-    //     samples00.g,
-    //     samples01.b,
-    //     1.0
-    //     );
-
-
-    // let samples0 = textureSample(texture, our_sampler, uv_ndx + vec2<f32>(-offset, 0.0));
-    // let samples1 = textureSample(texture, our_sampler, uv_ndx);
-    // let samples2 = textureSample(texture, our_sampler, uv_ndx + vec2<f32>(offset, 0.0));
-    // let edge = length(samples1.rgb - samples0.rgb) + length(samples1.rgb - samples2.rgb);
-
-    // var output_color = vec4<f32>(
-    //     samples0.r,
-    //     samples1.g,
-    //     samples2.b,
-    //     1.0
-    //     );
-
     output_color = pow(output_color, vec4<f32>(2.2)); // Gamma correction
 
     // Scanlines & effects
@@ -118,9 +98,9 @@ fn fragment(
 
     if border > 0.0 {
         brightness *= clamp(border, 0.0, 0.01);
-        if uv.x < uv.y {
-            output_color = output_color + vec4<f32>(0.2, 0.2, 0.2, 0.0);
-        }
+        let bevel = 100.0;
+        let sides = clamp((uv.y - uv.x)*bevel, 0.0, 1.0) + clamp((uv.x + uv.y - 1.0)*bevel, 0.0, 1.0);
+        output_color = output_color + vec4<f32>(0.2, 0.2, 0.2, 0.0) * sides;
     } else {
         brightness *= clamp(-0.1-border*10.0, 0.0, 1.0);
     }

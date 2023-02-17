@@ -128,7 +128,10 @@ fn update_camera(
       }
     }
 
-    let camera_offset = Vec3::new(1.0, -10.0, 10.0) * target.distance;
+    let camera_offset = Vec3::new(10.0, -10.0, 10.0); // SimCity 2000
+    // let camera_offset = Vec3::new(1.0, -10.0, 10.0); // SimCity 4
+    //let camera_offset = Vec3::new(0.0, -10.0, 10.0); // Factorio
+    let camera_offset = camera_offset * target.distance;
     let camera_loc = target.looking_at + camera_offset;
     *transform = Transform::from_translation(camera_loc).looking_at(target.looking_at, Vec3::Z)
         .with_scale(Vec3::splat(target.distance));

@@ -24,7 +24,7 @@ pub fn start_app() {
 
             window: WindowDescriptor {
                 title: "Robopocalypse Simulator 98".to_string(),
-                mode: WindowMode::Fullscreen,
+                mode: WindowMode::BorderlessFullscreen,
                 present_mode: PresentMode::Immediate,
                 cursor_visible: true,
                 //cursor_grab_mode: CursorGrabMode::Confined,
