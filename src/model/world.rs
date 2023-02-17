@@ -119,6 +119,12 @@ impl World {
   pub fn set_auto_action(&mut self, auto: AutoNdx, action: Action) {
     let auto = self.get_auto_mut(auto);
     auto.action = action;
+    auto.action_finished = false;
+  }
+
+  pub fn get_auto_action(&self, auto: AutoNdx) -> Action {
+    let auto = self.get_auto(auto);
+    auto.action
   }
 
   pub fn stall_message(&self, auto: AutoNdx) -> Option<String> {
@@ -142,23 +148,26 @@ impl World {
 
   pub fn update_auto(&mut self, ndx: AutoNdx, dur: f64) {
     let auto = self.get_auto_mut(ndx);
-    auto.action_time += dur;
-    if auto.action_time >= 1.0 {
-      auto.action_time = 0.0;
-      let action = auto.action;
-      let stall_message = action.act(self, ndx);
-      let auto = self.get_auto_mut(ndx);
-      auto.stall_message = stall_message;
-      let auto = self.get_auto(ndx);
-      if let Some(message) = &auto.stall_message {
-        println!("{}: {}", self.kinds.get_data(auto.kind).name, message);
+    if !auto.action_finished {
+      auto.action_time += dur;
+      if auto.action_time >= 1.0 {
+        auto.action_time = 0.0;
+        let action = auto.action;
+        let stall_message = action.act(self, ndx);
+        let auto = self.get_auto_mut(ndx);
+        auto.stall_message = stall_message;
+        let auto = self.get_auto(ndx);
+        if let Some(message) = &auto.stall_message {
+          println!("{}: {}", self.kinds.get_data(auto.kind).name, message);
+        }
       }
     }
   }
 
   pub fn finish_auto_action(&mut self, ndx: AutoNdx) {
     let auto = self.get_auto_mut(ndx);
-    auto.action = Action::Stop;
+    auto.action_finished = true;
+    //auto.action = Action::Stop;
     auto.action_time = 0.0;
   }
 

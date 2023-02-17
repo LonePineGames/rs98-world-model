@@ -17,6 +17,7 @@ pub struct Auto {
   pub action_time: f64,
   pub stall_message: Option<String>,
   pub alive: bool,
+  pub action_finished: bool,
 }
 
 impl Auto {

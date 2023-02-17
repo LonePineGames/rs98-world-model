@@ -11,7 +11,7 @@ pub type EventHandler = fn(Vec<Val>, &mut ProgramSpace, &mut World, AutoNdx);
 
 pub fn get_event_handlers() -> HashMap<String, EventHandler> {
   let mut handlers = HashMap::<String, EventHandler>::new();
-  handlers.insert("goto".to_string(), ev_goto);
+  //handlers.insert("goto".to_string(), ev_goto);
   handlers.insert("move".to_string(), ev_move);
   handlers.insert("pick".to_string(), ev_pick);
   handlers.insert("place".to_string(), ev_place);

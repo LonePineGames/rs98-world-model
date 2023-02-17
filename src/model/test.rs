@@ -130,14 +130,17 @@ fn test_goto() {
   world.set_auto_action(robo, Action::Goto(end));
 
   let mut steps = 0;
-  while world.get_auto(robo).action != Action::Stop {
+  while !world.get_auto(robo).action_finished {
     world.update(2.0);
     assert_eq!(world.stall_message(robo), None);
     steps += 1;
+    if steps > 100 {
+      panic!("Goto took too long");
+    }
   }
 
   assert_eq!(world.get_auto(robo).loc, end);
-  assert_eq!(world.get_auto(robo).action, Action::Stop);
+  assert_eq!(world.get_auto(robo).action, Action::Goto(end));
   assert_eq!(steps, 21);
 }
 
@@ -165,14 +168,17 @@ fn test_goto_impeded() {
   world.set_auto_action(robo, Action::Goto(end));
 
   let mut steps = 0;
-  while world.get_auto(robo).action != Action::Stop {
+  while !world.get_auto(robo).action_finished {
     world.update(2.0);
     assert_eq!(world.stall_message(robo), None);
     steps += 1;
+    if steps > 100 {
+      panic!("Goto took too long");
+    }
   }
 
   assert_eq!(world.get_auto(robo).loc, end);
-  assert_eq!(world.get_auto(robo).action, Action::Stop);
+  assert_eq!(world.get_auto(robo).action, Action::Goto(end));
   assert_eq!(steps, 43);
 }
 

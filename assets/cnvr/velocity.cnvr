@@ -1,4 +1,4 @@
-(define (goto x y) (event 'goto x y))
+
 (define (move d) (event 'move d))
 (define (stop) (event 'stop))
 (define (pick) (event 'pick))
