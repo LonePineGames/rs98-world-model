@@ -1,5 +1,6 @@
 
 use bevy::{prelude::{IVec2, Resource, Plugin, App, ResMut, Res, Vec3}, time::Time};
+use conniver::Val;
 
 use crate::model::{auto::{Auto, AutoNdx}, kind::{Kind, Kinds}, act::Action, pattern::{Pattern, Patterns}};
 
@@ -18,6 +19,11 @@ impl World {
       kinds,
       autos: vec![],
     };
+    world.create_auto(Auto {
+      kind: world.kinds.get("space"),
+      dim: IVec2::new(100, 100),
+      ..Auto::default()
+    });
     world
   }
 
@@ -95,6 +101,11 @@ impl World {
     }
     self.autos.push(new);
     result
+  }
+
+  pub fn create_auto_from_val(&mut self, val: Val) -> AutoNdx {
+    let new = Auto::from_val(val, &self.kinds);
+    self.create_auto(new)
   }
 
   pub fn get_auto_mut(&mut self, auto_ndx: AutoNdx) -> &mut Auto {
@@ -236,7 +247,7 @@ pub struct RS98WorldPlugin;
 impl Plugin for RS98WorldPlugin {
   fn build(&self, app: &mut App) {
     app
-      .insert_resource(World::new_lab())
+      .insert_resource(World::new_blank())
       .add_system(update_world);
   }
 }

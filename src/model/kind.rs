@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 
 use bevy::prelude::IVec2;
-use conniver::{Val, read_object, read_ivec2, object::read_string};
+use conniver::{Val, read_object, read_ivec2, object::read_string, p};
 
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Hash)]
 pub struct Kind(pub usize);
@@ -21,7 +21,20 @@ pub struct Kinds {
 
 impl Kinds {
   pub fn new_blank() -> Kinds {
-    Kinds { kinds: vec![], kinds_by_name: HashMap::new() }
+    let mut kinds = Kinds { kinds: vec![], kinds_by_name: HashMap::new() };
+    kinds.set_by_val(p("(
+      (name nothing)
+      (traction 10)
+    )"));
+    kinds.set_by_val(p("(
+      (name missingno)
+      (traction 1)
+    )"));
+    kinds.set_by_val(p("(
+      (name space)
+      (traction 1)
+    )"));
+    kinds
   }
 
   pub fn new_test() -> Kinds {

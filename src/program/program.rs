@@ -12,7 +12,7 @@ pub struct RS98ProgramPlugin;
 impl Plugin for RS98ProgramPlugin {
   fn build(&self, app: &mut App) {
     app
-      .insert_resource(ProgramSpace::new(AutoNdx(1)))
+      .insert_resource(ProgramSpace::new_load(AutoNdx(0)))
       .add_system(update_program)
       .add_system(process_messages)
       ;
@@ -60,6 +60,12 @@ impl ProgramSpace {
     }
   }
 
+  pub fn new_load(access: AutoNdx) -> Self {
+    let mut result = Self::new(access);
+    result.interrupt(AutoNdx(0), p("(load \"assets/cnvr/load.cnvr\")"));
+    result
+  }
+
   pub fn ensure_size(&mut self, size: usize) {
     let size = size + 1;
     let old_size = self.procs.len();
@@ -80,7 +86,6 @@ impl ProgramSpace {
   pub fn update(&mut self, dur: f64) {
     for state in &mut self.procs {
       if state.running() {
-        println!("running");
         state.run();
       }
     }
@@ -92,6 +97,7 @@ impl ProgramSpace {
       let ndx = AutoNdx(ndx);
       if let Some(message) = state.message_peek() {
         if let Some(Val::Sym(message_name)) = message.get(0) {
+          println!("message: {}", message_name);
           if let Some(handler) = self.message_handlers.get(message_name) {
             messages.push((message, *handler, ndx));
           }

@@ -1,0 +1,60 @@
+(define-kind
+  (name nothing)
+)
+
+(define-kind
+  (name missingno)
+)
+
+(define-kind
+  (name space)
+)
+
+(define-kind
+  (name earth)
+)
+
+(define-kind
+  (name lab-tile)
+  (scene "model/lab-tile.glb#Scene0")
+  (traction 1)
+)
+
+(define-kind
+  (name bauxite)
+  (scene "model/baux.glb#Scene0")
+)
+
+(define-kind
+  (name robo)
+  (scene "model/r1000.glb#Scene0")
+  (dim 1 1)
+  (traction 2)
+)
+
+(define-kind
+  (name lab-wall)
+  (scene "model/lab-wall.glb#Scene0")
+  (traction 5)
+)
+
+(define-kind
+  (name table)
+  (scene "model/table.glb#Scene0")
+  (dim 2 1)
+  (traction 5)
+)
+
+(define-kind
+  (name rcarmack)
+  (scene "model/rcarmack.glb#Scene0")
+  (dim 1 1)
+  (traction 2)
+)
+
+(define-kind
+  (name jarchi)
+  (scene "model/jarchi.glb#Scene0")
+  (dim 1 1)
+  (traction 2)
+)

@@ -3,7 +3,7 @@ use conniver::p;
 
 use crate::{model::{world::World, auto::{AutoNdx, Auto}, act::Action, kind::Kind, dir::Dir}, program::{program::ProgramSpace}};
 
-fn run100(world: &mut World, program: &mut ProgramSpace, robo: AutoNdx, expected_steps: usize) {
+fn run100(world: &mut World, program: &mut ProgramSpace, robo: AutoNdx, expected_steps: i32) {
   let mut steps = 0;
   while steps < 100 && (!program.idle(robo) || (world.get_auto(robo).action != Action::Stop && !world.get_auto(robo).action_finished)) {
     program.update(1.0);
@@ -12,7 +12,9 @@ fn run100(world: &mut World, program: &mut ProgramSpace, robo: AutoNdx, expected
     assert_eq!(world.stall_message(robo), None);
     steps += 1;
   }
-  assert_eq!(steps, expected_steps);
+  if expected_steps >= 0 {
+    assert_eq!(steps, expected_steps);
+  }
 }
 
 #[test]
@@ -110,4 +112,92 @@ fn test_input_pick_place() {
   assert_eq!(world.get_auto(robo).loc, start);
   assert_eq!(world.get_auto(robo).action, Action::Stop);
   assert_eq!(world.get_item(space, start), rock);
+}
+
+#[test]
+fn test_load() {
+  let mut world = World::new_blank(); 
+  let space = AutoNdx(0);
+  let mut program = ProgramSpace::new(AutoNdx(0));
+
+  program.interrupt(space, p("(do 
+    (define-kind 
+      (name rock)
+      (traction 1)
+    )
+    (define-kind 
+      (name grass)
+      (traction 1)
+    )
+    (define-kind 
+      (name earth)
+      (traction 1)
+    )
+    (define-kind 
+      (name robo)
+      (traction 1)
+    )
+    (define earth-auto (create-auto 
+      (kind earth)
+      (loc 0 0)
+      (parent 0)
+      (dim 50 50)
+      (tile grass)
+    ))
+    (define player (create-auto 
+      (kind robo)
+      (loc 10 10)
+      (parent earth-auto)
+      (dim 1 1)
+    ))
+    (access player)
+  )"));
+
+  run100(&mut world, &mut program, space, -1);
+  
+  let rock = world.kinds.get("rock");
+  let rock_data = world.kinds.get_data(rock);
+  assert_eq!(rock_data.name, "rock");
+  assert_eq!(rock_data.traction, 1);
+
+  let earth = AutoNdx(1);
+  let earth_data = world.get_auto(earth);
+  assert_eq!(earth_data.kind, world.kinds.get("earth"));
+  assert_eq!(earth_data.loc, IVec2::new(0, 0));
+  assert_eq!(earth_data.parent, space);
+  assert_eq!(earth_data.dim, IVec2::new(50, 50));
+  assert_eq!(world.get_tile(earth, IVec2::new(0, 0)), world.kinds.get("grass"));
+
+  let robo = AutoNdx(2);
+  let robo_data = world.get_auto(robo);
+  assert_eq!(robo_data.kind, world.kinds.get("robo"));
+  assert_eq!(robo_data.loc, IVec2::new(10, 10));
+  assert_eq!(robo_data.parent, earth);
+  assert_eq!(program.access, robo);
+
+}
+
+#[test]
+fn test_access() {
+  let mut world = World::new_test(); 
+  let space = AutoNdx(0);
+  let mut program = ProgramSpace::new(AutoNdx(0));
+
+  let robo = world.create_auto(Auto {
+    kind: world.kinds.get("robo"),
+    loc: IVec2::new(0, 0),
+    parent: space,
+    dim: IVec2::new(1, 1),
+    ..Auto::default()
+  });
+  assert_eq!(robo, AutoNdx(1));
+
+  assert_eq!(program.access, space);
+  program.interrupt(space, p("(access 1)"));
+  run100(&mut world, &mut program, space, -1);
+  assert_eq!(program.access, robo);
+}
+
+fn test_shell_display() {
+  
 }

@@ -42,7 +42,7 @@ pub fn get_message_handlers() -> HashMap<String, MessageHandler> {
 
   handlers.insert("print".to_string(), |args, _, _, _| {
     println!("{}", args[1..].iter().map(|v| read_string(v)).collect::<Vec<String>>().join(""));
-    None
+    Some(Val::nil())
   });
 
   handlers.insert("move".to_string(), |args, _, world, auto| {
@@ -90,10 +90,40 @@ pub fn get_message_handlers() -> HashMap<String, MessageHandler> {
     action_handler(world, auto, Action::Place(Kind(0)))
   });
 
+  handlers.insert("define-kind".to_string(), |args, _, world, _| {
+    if args.len() < 1 {
+      return Some(Val::String("usage: (define-kind (name x) ...)".to_owned()));
+    }
+    let args = Val::List(args[1..].to_vec());
+    world.kinds.set_by_val(args);
+    Some(Val::nil())
+  });
+
+  handlers.insert("create-auto".to_string(), |args, _, world, _| {
+    if args.len() < 1 {
+      return Some(Val::String("usage: (create-auto (name x) ...)".to_owned()));
+    }
+    let args = Val::List(args[1..].to_vec());
+    let auto = world.create_auto_from_val(args);
+    Some(Val::Num(auto.0 as f32))
+  });
+
+  handlers.insert("access".to_string(), |args, program, _, _| {
+    if args.len() < 1 {
+      return Some(Val::String("usage: (access auto)".to_owned()));
+    }
+    let auto = if let Val::Num(auto) = &args[1] {
+      AutoNdx(*auto as usize)
+    } else {
+      return Some(Val::String("usage: (access auto)".to_owned()));
+    };
+    program.access = auto;
+    Some(Val::nil())
+  });
+
   handlers
 }
 
-// fn(Vec<Val>, &mut ProgramSpace, &mut World, AutoNdx) -> 
 fn action_handler(world: &mut World, auto: AutoNdx, generator: Action) -> Option<Val> {
   let action = world.get_auto_action(auto);
   if action != generator {

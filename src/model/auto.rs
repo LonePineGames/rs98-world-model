@@ -1,4 +1,5 @@
 use bevy::prelude::IVec2;
+use conniver::{read_object, read_ivec2, object::read_string, Val};
 
 use crate::model::{kind::Kind, act::Action};
 
@@ -65,6 +66,38 @@ impl Auto {
       new.tiles.resize(num_items, Kind(0));
     }
     new
+  }
+
+  pub fn from_val(val: Val, kinds: &Kinds) -> Auto {
+    let mut auto = Auto::default();
+    let mut tile_kind = Kind(0);
+    read_object(&val, |key, val| {
+      match key {
+        "kind" => auto.kind = kinds.get(&read_string(val)),
+        "parent" => if let Val::Num(i) = val {
+          auto.parent = AutoNdx(*i as usize);
+        } else {
+          println!("bad parent: {:?}", val);
+        },
+        "tile" => tile_kind = kinds.get(&read_string(val)),
+        "dim" => read_ivec2(val, |x, y| {
+          auto.dim = IVec2::new(x, y);
+        }, || {
+          println!("bad dim: {:?}", val);
+        }),
+        "loc" => read_ivec2(val, |x, y| {
+          auto.loc = IVec2::new(x, y);
+        }, || {
+          println!("bad loc: {:?}", val);
+        }),
+        _ => println!("bad auto key: {}", key)
+      }
+    });
+    auto.initalize(kinds);
+    if tile_kind.0 != 0 {
+      auto.tiles = vec![tile_kind; (auto.dim.x * auto.dim.y) as usize];
+    }
+    auto
   }
 
   pub fn ndx_to_loc(&self, ndx: usize) -> IVec2 {
