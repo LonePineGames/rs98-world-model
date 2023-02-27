@@ -31,12 +31,15 @@ pub fn start_app() {
                 ..default()
             },
             ..default()
+        }).set(AssetPlugin {
+            watch_for_changes: true,
+            ..default()
         }))
         //.add_plugin(WorldInspectorPlugin)
         .add_plugin(RS98WorldPlugin)
         .add_plugin(RS98ProgramPlugin)
         .add_plugin(RS98InputPlugin)
-        .add_plugin(RS98PostPlugin) // comment out this line to disable post-processing
+        //.add_plugin(RS98PostPlugin) // comment out this line to disable post-processing
         .add_plugin(RS98CameraPlugin)
         .add_plugin(RS98TextPlugin)
         .add_plugin(RS98EntitiesPlugin)

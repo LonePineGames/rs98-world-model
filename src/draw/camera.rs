@@ -71,7 +71,7 @@ pub fn setup_camera(
     transform: Transform::from_xyz(5.0, -5.0, 10.0).looking_at(Vec3::ZERO, Vec3::Z),
     directional_light: DirectionalLight {
       color: Color::rgb(1.0, 1.0, 1.0),
-      illuminance: 50000.0,
+      illuminance: 10000.0,
       shadows_enabled: true,
       shadow_projection,
       ..default()
@@ -83,7 +83,7 @@ pub fn setup_camera(
   commands.spawn(DirectionalLightBundle {
     transform: Transform::from_xyz(-5.0, 5.0, 10.0).looking_at(Vec3::ZERO, Vec3::Z),
     directional_light: DirectionalLight {
-      color: Color::rgb(0.9, 1.0, 1.0),
+      color: Color::rgb(1.0, 1.0, 1.0),
       illuminance: 5000.0,
       shadows_enabled: false,
       ..default()
