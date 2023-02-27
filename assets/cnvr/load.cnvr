@@ -27,3 +27,11 @@
   (loc 4 4)
   (parent earth-auto)
 )
+
+(create-auto
+  (kind autoprocessor)
+  (loc 12 4)
+  (parent earth-auto)
+)
+
+(set-item earth-auto 8 8 bauxite)

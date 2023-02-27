@@ -40,6 +40,36 @@ pub fn get_message_handlers() -> HashMap<String, MessageHandler> {
     Some(Val::String(item_name))
   });
 
+  handlers.insert("set-item".to_string(), |args, _, world, _| {
+    println!("set-item: {:?}", args);
+    if args.len() < 5 {
+      return Some(Val::String("usage: (set-item auto x y kind)".to_owned()));
+    }
+    let auto = if let Val::Num(auto) = &args[1] {
+      AutoNdx(*auto as usize)
+    } else {
+      return Some(Val::String("usage: (set-item auto x y kind)".to_owned()));
+    };
+    let x = if let Val::Num(x) = args[2] {
+      x as i32
+    } else {
+      return Some(Val::String("usage: (set-item auto x y kind)".to_owned()));
+    };
+    let y = if let Val::Num(y) = args[3] {
+      y as i32
+    } else {
+      return Some(Val::String("usage: (set-item auto x y kind)".to_owned()));
+    };
+    let pos = IVec2::new(x, y);
+    let kind = if let Val::Sym(kind) = &args[4] {
+      world.kinds.get(kind)
+    } else {
+      return Some(Val::String("usage: (set-item auto x y kind)".to_owned()));
+    };
+    world.set_item(auto, pos, kind);
+    Some(Val::nil())
+  });
+
   handlers.insert("print".to_string(), |args, _, _, _| {
     println!("{}", args[1..].iter().map(|v| read_string(v)).collect::<Vec<String>>().join(""));
     Some(Val::nil())
@@ -119,6 +149,11 @@ pub fn get_message_handlers() -> HashMap<String, MessageHandler> {
     };
     program.access = auto;
     Some(Val::nil())
+  });
+
+  handlers.insert("quit".to_string(), |_, _, _, _| {
+    // quit the application
+    std::process::exit(0);
   });
 
   handlers

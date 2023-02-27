@@ -42,7 +42,12 @@
   (name table)
   (scene "model/table.glb#Scene0")
   (dim 2 1)
-  (traction 5)
+)
+
+(define-kind
+  (name autoprocessor)
+  (scene "model/autoprocessor.glb#Scene0")
+  (dim 2 1)
 )
 
 (define-kind

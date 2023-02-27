@@ -151,6 +151,7 @@ fn test_load() {
       (dim 1 1)
     ))
     (access player)
+    (set-item earth-auto 10 10 rock)
   )"));
 
   run100(&mut world, &mut program, space, -1);
@@ -167,6 +168,7 @@ fn test_load() {
   assert_eq!(earth_data.parent, space);
   assert_eq!(earth_data.dim, IVec2::new(50, 50));
   assert_eq!(world.get_tile(earth, IVec2::new(0, 0)), world.kinds.get("grass"));
+  assert_eq!(world.get_item(earth, IVec2::new(10, 10)), rock);
 
   let robo = AutoNdx(2);
   let robo_data = world.get_auto(robo);
