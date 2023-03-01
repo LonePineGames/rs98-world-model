@@ -34,8 +34,8 @@ fn fragment(
     let texcoord = texcoord + (texcoord * (barrel_distortion * rsq));
     let texcoord = texcoord * rescale;
     let uv_ndx = texcoord + vec2<f32>(0.5);
-    let uv_ndx = vec2<f32>(uv_ndx.x, floor(uv_ndx.y * vert_res) / vert_res);
-    let offset = 0.002;
+    //let uv_ndx = vec2<f32>(uv_ndx.x, floor(uv_ndx.y * vert_res) / vert_res);
+    let offset = 0.001;
     
     let dist = max(abs(uv_ndx.x - 0.5), abs(uv_ndx.y - 0.5));
     let dist = dist - 0.5 + offset;
@@ -61,40 +61,44 @@ fn fragment(
         + length(samples19 - samples00)
         + length(samples10 - samples00)
         + length(samples11 - samples00);
-    let edge = clamp( edge*0.125 , 0.0, 1.0);
+    let edge = clamp( edge*0.25 , 0.0, 1.0);
+    let average_color = (samples99 + samples90 + samples91 + samples09 + samples00 + samples01 + samples19 + samples10 + samples11) / 9.0;
 
-    let redshift = sin(time * 0.05) * 0.5 + 0.5;
-    let blueshift = cos(time * 0.05) * 0.5 + 0.5;
-    let redshift = redshift + pow(redshift, 240.0) * 2.0 + 0.5;
-    let blueshift = redshift + pow(blueshift, 240.0) * 2.0 + 0.5;
-    let redshift = redshift * 0.5;
-    let blueshift = blueshift * 0.75;
+    // let redshift = sin(time * 0.05) * 0.5 + 0.5;
+    // let blueshift = cos(time * 0.05) * 0.5 + 0.5;
+    // let redshift = redshift + pow(redshift, 240.0) * 2.0 + 0.5;
+    // let blueshift = redshift + pow(blueshift, 240.0) * 2.0 + 0.5;
+    // let redshift = redshift * 0.5;
+    // let blueshift = blueshift * 0.75;
+    let redshift = -1.0;
+    let blueshift = 2.0;
 
     // Sample each color channel with an arbitrary shift
     var output_color = vec4<f32>(
-        textureSample(texture, our_sampler, uv_ndx + vec2<f32>(-offset*redshift, 0.0)).r,
+        textureSample(texture, our_sampler, uv_ndx + vec2<f32>(offset*redshift, 0.0)).r,
         samples00.g,
         textureSample(texture, our_sampler, uv_ndx + vec2<f32>(offset*blueshift, 0.0)).b,
         1.0
         );
+    output_color = mix(output_color, average_color, 0.5);
 
     // blur edges 
     let samples0 = samples99 + samples90 + samples91 + samples09 + samples00 + samples01 + samples19 + samples10 + samples11;
     let samples0 = samples0 / 9.0;
     output_color = mix(output_color, samples0, clamp(border, 0.0, 1.0));
 
-    output_color = pow(output_color, vec4<f32>(2.2)); // Gamma correction
+    //output_color = pow(output_color, vec4<f32>(1.0/2.2)); // Gamma correction
 
     // Scanlines & effects
     //let scanline = abs(fract(uv.y * scanlines) - 0.5) * 2.0 - 0.5;
     let scanline = sin(uv_ndx.y * scanlines * 3.1415) * 0.5 + 0.5;
     let scanline = scanline * clamp(redshift + blueshift, 1.0, 2.0);
     let vignet = pow(2. - length(uv - vec2<f32>(0.5, 0.5)) * 1.5, 1.5);
-    let vignet = clamp(vignet, 0.0, 1.75);
     let sync = fract(floor((uv_ndx.y - time * 0.05) * scanlines) / scanlines) * 0.2;
-    let brightness = vignet - scanline*0.5 - sync - pow(edge, 0.5)*8.0 - 0.5;
-    let brightness = clamp(brightness, 0.5, 1.25);
-    var brightness = pow(brightness, 1.0/2.2); // Gamma correction
+    var brightness = 2.0;
+    //0.8 + vignet;// - edge*2.0 - scanline; //vignet - sync - pow(edge, 0.5)*8.0 - 0.5;
+    //let brightness = clamp(brightness, 0.5, 2.0);
+    //var brightness = pow(brightness, 2.2); // Gamma correction
 
     if border > 0.0 {
         brightness *= clamp(border, 0.0, 0.01);
@@ -102,8 +106,10 @@ fn fragment(
         let sides = clamp((uv.y - uv.x)*bevel, 0.0, 1.0) + clamp((uv.x + uv.y - 1.0)*bevel, 0.0, 1.0);
         output_color = output_color + vec4<f32>(0.2, 0.2, 0.2, 0.0) * sides;
     } else {
+        brightness = vignet*0.5 - edge*1.5 - scanline*0.25;// - sync;
         brightness *= clamp(-0.1-border*10.0, 0.0, 1.0);
     }
+    //let brightness = pow(brightness, 2.2); // Gamma correction
     output_color = vec4<f32>(output_color.rgb * brightness, 0.9);
     //output_color = vec4<f32>(output_color.rgb * (vignet - scanline*1.5 - sync - edge*2.0), 1.0);
     return output_color;

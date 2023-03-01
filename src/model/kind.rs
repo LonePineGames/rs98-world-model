@@ -22,16 +22,13 @@ pub struct Kinds {
 impl Kinds {
   pub fn new_blank() -> Kinds {
     let mut kinds = Kinds { kinds: vec![], kinds_by_name: HashMap::new() };
-    kinds.set_by_val(p("(
-      (name nothing)
+    kinds.set_by_val("nothing", p("(
       (traction 10)
     )"));
-    kinds.set_by_val(p("(
-      (name missingno)
+    kinds.set_by_val("missingno", p("(
       (traction 1)
     )"));
-    kinds.set_by_val(p("(
-      (name space)
+    kinds.set_by_val("space", p("(
       (traction 1)
     )"));
     kinds
@@ -114,7 +111,7 @@ impl Kinds {
   }
 
   pub fn missingno(&self) -> Kind {
-    Kind(0)
+    Kind(1)
   }
 
   pub fn get_data(&self, kind: Kind) -> &KindData {
@@ -125,16 +122,9 @@ impl Kinds {
     &mut self.kinds[kind.0]
   }
 
-  pub fn set_by_val(&mut self, data: Val) {
+  pub fn set_by_val(&mut self, name: &str, data: Val) {
     let mut kind_data = KindData::default();
-
-    // read once for the name
-    read_object(&data, |key, val| {
-      match key {
-        "name" => kind_data.name = format!("{:?}", val),
-        _ => {}
-      }
-    });
+    kind_data.name = name.to_string();
 
     if kind_data.name == "" {
       println!("bad kind: {:?}", data);
@@ -151,11 +141,12 @@ impl Kinds {
       kind
     };
     let kind_data = self.get_data_mut(kind);
+    let mut new_name = None;
 
-    // now read again for the rest
+    // now read the data
     read_object(&data, |key, val| {
       match key {
-        "name" => kind_data.name = read_string(val),
+        "name" => new_name = Some(read_string(val)), // allows renaming
         "scene" => kind_data.scene = read_string(val),
 
         "dim" => read_ivec2(val, |x, y| {
@@ -173,5 +164,13 @@ impl Kinds {
         _ => {}
       }
     });
+
+    // if we renamed, update the name map
+    if let Some(new_name) = new_name {
+      let old_name = kind_data.name.clone();
+      kind_data.name = new_name.clone();
+      self.kinds_by_name.remove(&old_name);
+      self.kinds_by_name.insert(new_name, kind);
+    }
   }
 }

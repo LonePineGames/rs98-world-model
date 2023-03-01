@@ -1,64 +1,135 @@
-(define-kind
-  (name nothing)
+(define-kind nothing
 )
 
-(define-kind
-  (name missingno)
+(define-kind missingno
 )
 
-(define-kind
-  (name space)
+(define-kind space
 )
 
-(define-kind
-  (name earth)
+(define-kind earth
 )
 
-(define-kind
-  (name lab-tile)
+(define-kind lab-tile
   (scene "model/lab-tile.glb#Scene0")
   (traction 1)
 )
 
-(define-kind
-  (name bauxite)
+(define-kind bauxite
   (scene "model/baux.glb#Scene0")
 )
 
-(define-kind
-  (name robo)
+(define-kind ore
+  (scene "model/ore.glb#Scene0")
+)
+
+(define-kind quartz
+  (scene "model/quartz.glb#Scene0")
+)
+
+(define-kind fluorite
+  (scene "model/fluorite.glb#Scene0")
+)
+
+(define-kind oil
+  (scene "model/oil.glb#Scene0")
+)
+
+(define-kind water
+  (scene "model/water.glb#Scene0")
+)
+
+(define-kind fuel
+  (scene "model/fuel.glb#Scene0")
+)
+
+(define-kind hypoxic
+  (scene "model/hypoxic.glb#Scene0")
+)
+
+(define-kind plastic
+  (scene "model/plastic.glb#Scene0")
+)
+
+(define-kind battery
+  (scene "model/battery.glb#Scene0")
+)
+
+(define-kind wafer0
+  (scene "model/wafer0.glb#Scene0")
+)
+
+(define-kind wafer1
+  (scene "model/wafer1.glb#Scene0")
+)
+
+(define-kind wafer2
+  (scene "model/wafer2.glb#Scene0")
+)
+
+(define-kind wafer3
+  (scene "model/wafer3.glb#Scene0")
+)
+
+(define-kind chip
+  (scene "model/chip.glb#Scene0")
+)
+
+(define-kind controller
+  (scene "model/controller.glb#Scene0")
+)
+
+(define-kind ingot
+  (scene "model/ingot.glb#Scene0")
+)
+
+(define-kind wire
+  (scene "model/wire.glb#Scene0")
+)
+
+(define-kind arm
+  (scene "model/arm.glb#Scene0")
+)
+
+(define-kind motor
+  (scene "model/motor.glb#Scene0")
+)
+
+(define-kind wheel (scene "model/wheel.glb#Scene0"))
+
+(define-kind r1000
   (scene "model/r1000.glb#Scene0")
   (dim 1 1)
   (traction 2)
 )
 
-(define-kind
-  (name lab-wall)
+(define-kind lab-wall
   (scene "model/lab-wall.glb#Scene0")
   (traction 5)
 )
 
-(define-kind
-  (name table)
+(define-kind table
   (scene "model/table.glb#Scene0")
   (dim 2 1)
 )
 
-(define-kind
-  (name autoprocessor)
+(define-kind autoprocessor
   (scene "model/autoprocessor.glb#Scene0")
   (dim 2 1)
 )
 
-(define-kind
-  (name rcarmack)
+(define-kind pad
+  (scene "model/pad.glb#Scene0")
+  (dim 3 3)
+)
+
+(define-kind rcarmack
   (scene "model/rcarmack.glb#Scene0")
   (dim 1 1)
   (traction 2)
 )
 
-(define-kind
-  (name jarchi)
+(define-kind jarchi
   (scene "model/jarchi.glb#Scene0")
   (dim 1 1)
   (traction 2)

@@ -266,18 +266,15 @@ fn test_fire() {
 fn test_load_kinds() {
   let mut world = World::new_blank();
   
-  world.kinds.set_by_val(p("(
-    (name nothing)
+  world.kinds.set_by_val("nothing", p("(
     (traction 10)
   )"));
 
-  world.kinds.set_by_val(p("(
-    (name missingno)
+  world.kinds.set_by_val("missingno", p("(
     (traction 1)
   )"));
 
-  world.kinds.set_by_val(p("(
-    (name robo)
+  world.kinds.set_by_val("robo", p("(
     (traction 0)
     (dim 1 1)
     (scene \"model/r1000.glb#Scene0\")
@@ -314,8 +311,7 @@ fn test_load_kinds() {
   assert_eq!(robo_data.parent, AutoNdx(0));
   assert_eq!(robo_data.dim, IVec2::new(1, 1));
 
-  world.kinds.set_by_val(p("(
-    (name missingno)
+  world.kinds.set_by_val("missingno", p("(
     (dim 2 2)
   )"));
   let missingno = world.kinds.get("missingno");
@@ -325,4 +321,15 @@ fn test_load_kinds() {
   assert_eq!(missingno.traction, 1);
   assert_eq!(missingno.item_dim, IVec2::new(2, 2));
 
+  // rename
+  world.kinds.set_by_val("robo", p("((name r1000))"));
+  let new_robo = world.kinds.get("r1000");
+  assert_eq!(new_robo, robo);
+  let new_robo_data = world.kinds.get_data(new_robo);
+  assert_eq!(new_robo_data.name, "r1000");
+  assert_eq!(new_robo_data.traction, 0);
+  assert_eq!(new_robo_data.item_dim, IVec2::new(1, 1));
+
+  let missing = world.kinds.get("robo");
+  assert_eq!(missing.0, 1);
 }

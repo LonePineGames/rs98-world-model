@@ -121,20 +121,16 @@ fn test_load() {
   let mut program = ProgramSpace::new(AutoNdx(0));
 
   program.interrupt(space, p("(do 
-    (define-kind 
-      (name rock)
+    (define-kind rock
       (traction 1)
     )
-    (define-kind 
-      (name grass)
+    (define-kind grass
       (traction 1)
     )
-    (define-kind 
-      (name earth)
+    (define-kind earth
       (traction 1)
     )
-    (define-kind 
-      (name robo)
+    (define-kind robo
       (traction 1)
     )
     (define earth-auto (create-auto 

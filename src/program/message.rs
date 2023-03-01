@@ -121,11 +121,16 @@ pub fn get_message_handlers() -> HashMap<String, MessageHandler> {
   });
 
   handlers.insert("define-kind".to_string(), |args, _, world, _| {
-    if args.len() < 1 {
-      return Some(Val::String("usage: (define-kind (name x) ...)".to_owned()));
+    if args.len() < 2 {
+      return Some(Val::String("usage: (define-kind name (prop x) (prop y) ...)".to_owned()));
     }
-    let args = Val::List(args[1..].to_vec());
-    world.kinds.set_by_val(args);
+    let name = if let Val::Sym(name) = &args[1] {
+      name
+    } else {
+      return Some(Val::String("usage: (define-kind name (prop x) (prop y) ...)".to_owned()));
+    };
+    let props = Val::List(args[2..].to_vec());
+    world.kinds.set_by_val(name, props);
     Some(Val::nil())
   });
 

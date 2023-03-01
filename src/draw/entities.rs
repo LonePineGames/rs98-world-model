@@ -195,7 +195,7 @@ pub fn update_entities(
         let auto_loc = auto.loc.as_vec2().extend(0.0);
         let item = auto.items[loc];
         let loc = auto.ndx_to_loc(loc).as_vec2().extend(0.0);
-        let loc = loc + Vec3::new(0.0, -0.5, 0.5);
+        let loc = loc + Vec3::new(0.0, 0.0, 0.0);
         // if item != Kind(0) {
         //   println!("item: {:?} {:?} {:?}/{:?}", item, loc, auto_ndx, access);
         // }

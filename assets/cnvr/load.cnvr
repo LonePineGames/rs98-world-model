@@ -9,7 +9,7 @@
 ))
 
 (define player (create-auto
-  (kind robo)
+  (kind r1000)
   (loc 2 2)
   (parent earth-auto)
 ))
@@ -34,4 +34,36 @@
   (parent earth-auto)
 )
 
+(create-auto
+  (kind pad)
+  (loc 12 8)
+  (parent earth-auto)
+)
+
 (set-item earth-auto 8 8 bauxite)
+(set-item earth-auto 8 9 ore)
+(set-item earth-auto 8 10 ingot)
+(set-item earth-auto 8 11 wire)
+(set-item earth-auto 8 12 motor)
+(set-item earth-auto 8 13 arm)
+(set-item earth-auto 8 14 wheel)
+(set-item earth-auto 8 15 wheel)
+(set-item earth-auto 6 8 fluorite)
+(set-item earth-auto 6 9 water)
+(set-item earth-auto 6 10 oil)
+(set-item earth-auto 6 11 fuel)
+(set-item earth-auto 6 12 plastic)
+(set-item earth-auto 6 13 hypoxic)
+(set-item earth-auto 6 14 battery)
+(set-item earth-auto 4 8 quartz)
+(set-item earth-auto 4 9 wafer0)
+(set-item earth-auto 4 10 wafer1)
+(set-item earth-auto 4 11 wafer2)
+(set-item earth-auto 4 12 wafer3)
+(set-item earth-auto 4 13 chip)
+(set-item earth-auto 4 14 controller)
+(set-item earth-auto 4 15 chip)
+
+
+
+

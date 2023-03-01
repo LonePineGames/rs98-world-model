@@ -33,8 +33,10 @@ pub fn setup_camera(
     hdr: true,
     ..default()
   };
+  let mut illuminance = 10000.0;
   if let Some(render_image) = render_image {
     camera.target = RenderTarget::Image(render_image.image.clone());
+    illuminance = 20000.0;
   }
   commands.spawn((
     Camera3dBundle {
@@ -68,10 +70,10 @@ pub fn setup_camera(
 
   // light
   commands.spawn(DirectionalLightBundle {
-    transform: Transform::from_xyz(5.0, -5.0, 10.0).looking_at(Vec3::ZERO, Vec3::Z),
+    transform: Transform::from_xyz(2.0, -5.0, 10.0).looking_at(Vec3::ZERO, Vec3::Z),
     directional_light: DirectionalLight {
       color: Color::rgb(1.0, 1.0, 1.0),
-      illuminance: 10000.0,
+      illuminance,
       shadows_enabled: true,
       shadow_projection,
       ..default()
@@ -80,16 +82,16 @@ pub fn setup_camera(
   });
 
   // diffuse light
-  commands.spawn(DirectionalLightBundle {
-    transform: Transform::from_xyz(-5.0, 5.0, 10.0).looking_at(Vec3::ZERO, Vec3::Z),
-    directional_light: DirectionalLight {
-      color: Color::rgb(1.0, 1.0, 1.0),
-      illuminance: 5000.0,
-      shadows_enabled: false,
-      ..default()
-    },
-    ..default()
-  });
+  // commands.spawn(DirectionalLightBundle {
+  //   transform: Transform::from_xyz(-5.0, 5.0, 10.0).looking_at(Vec3::ZERO, Vec3::Z),
+  //   directional_light: DirectionalLight {
+  //     color: Color::rgb(1.0, 1.0, 1.0),
+  //     illuminance: 5000.0,
+  //     shadows_enabled: false,
+  //     ..default()
+  //   },
+  //   ..default()
+  // });
 
   commands.insert_resource(ClearColor(Color::rgb(0.0, 0.0, 0.01)));
 
