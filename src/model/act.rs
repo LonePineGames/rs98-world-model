@@ -94,22 +94,30 @@ impl Action {
         let holding_kind = world.get_item(auto_ndx, IVec2::new(0, 0));
         let loc = auto_data.loc;
         let parent = auto_data.parent;
+        let mut target = None;
         if dest == &world.kinds.nothing() {
-          world.set_item(parent, loc, holding_kind);
-          world.set_item(auto_ndx, IVec2::new(0, 0), world.kinds.nothing());
-          world.finish_auto_action(auto_ndx);
-          None
+          target = Some((parent, loc));
         } else {
           for other_ndx in world.get_autos_at(parent, loc) {
             let other = world.get_auto(other_ndx);
             if other.kind == *dest {
-              world.set_item(other_ndx, IVec2::new(0, 0), holding_kind);
-              world.set_item(auto_ndx, IVec2::new(0, 0), world.kinds.nothing());
-              world.finish_auto_action(auto_ndx);
-              return None;
+              target = Some((other_ndx, IVec2::new(0, 0)));
+              break;
             }
           }
-          Some(format!("Could not find {:?} in {:?}.", dest, auto_ndx))
+        }
+
+        if let Some((target_ndx, target_loc)) = target {
+          if world.has_item(target_ndx, target_loc) {
+            return Some("Location is not empty.".to_owned())
+          } else {
+            world.set_item(target_ndx, target_loc, holding_kind);
+            world.set_item(auto_ndx, IVec2::new(0, 0), world.kinds.nothing());
+            world.finish_auto_action(auto_ndx);
+            return None;
+          }
+        } else {
+          return Some(format!("Could not find {:?} in {:?}.", dest, auto_ndx))
         }
       }
 

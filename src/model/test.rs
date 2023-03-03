@@ -71,6 +71,26 @@ fn test_pick_place() {
   world.set_auto_action(robo, Action::Pick(rock, world.kinds.nothing()));
   world.update(2.0);
   assert_eq!(world.stall_message(robo), Some("Could not find Kind(3) on ground.".to_string()));
+  
+  let new_loc = loc + Dir::North.to_ivec2();
+  assert_eq!(world.get_auto(robo).loc, new_loc);
+  world.set_item(space, new_loc, rock);
+  world.set_auto_action(robo, Action::Pick(rock, world.kinds.nothing()));
+  world.update(2.0);
+  assert_eq!(world.stall_message(robo), None);
+  assert_eq!(world.get_item(space, new_loc), world.kinds.nothing());
+  assert_eq!(world.get_item(robo, IVec2::new(0, 0)), rock);
+
+  world.set_auto_action(robo, Action::Move(Dir::South));
+  world.update(2.0);
+  assert_eq!(world.stall_message(robo), None);
+  assert_eq!(world.get_auto(robo).loc, loc);
+  assert_eq!(world.get_item(space, loc), rock);
+  assert_eq!(world.get_item(robo, IVec2::new(0, 0)), rock);
+
+  world.set_auto_action(robo, Action::Place(world.kinds.nothing()));
+  world.update(2.0);
+  assert_eq!(world.stall_message(robo), Some("Location is not empty.".to_string()));
 
 }
 
@@ -108,6 +128,11 @@ fn test_pick_place_machine() {
   assert_eq!(world.stall_message(robo), None);
   assert_eq!(world.get_item(machine_ndx, IVec2::new(0, 0)), world.kinds.nothing());
   assert_eq!(world.get_item(robo, IVec2::new(0, 0)), rock);
+
+  world.set_item(machine_ndx, IVec2::new(0, 0), rock);
+  world.set_auto_action(robo, Action::Place(machine));
+  world.update(2.0);
+  assert_eq!(world.stall_message(robo), Some("Location is not empty.".to_string()));
 }
 
 #[test]
