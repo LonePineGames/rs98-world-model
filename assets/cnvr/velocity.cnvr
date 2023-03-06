@@ -1,13 +1,11 @@
 
-
-
 (define (input-key char)
   (cond 
     ((= char 'A) (set-program '(move w)))
-    ((= char 'E) (set-program '(move e)))
-    ((= char 'Comma) (set-program '(move n)))
-    ((= char 'O) (set-program '(move s)))
-    ((= char 'Period) (if (= "nothing" (item-at me 0 0)) 
+    ((= char 'D) (set-program '(move e)))
+    ((= char 'W) (set-program '(move n)))
+    ((= char 'S) (set-program '(move s)))
+    ((= char 'E) (if (= "nothing" (item-at me 0 0)) 
       (set-program '(pick))
       (set-program '(place))
     ))
@@ -18,3 +16,5 @@
 (define (input-mouse x y)
   (set-program ('goto x y))
 )
+
+(load "assets/cnvr/user.cnvr")

@@ -60,6 +60,24 @@ impl ProgramSpace {
     }
   }
 
+  pub fn new_lib_override(access: AutoNdx, lib: &Vec<Val>) -> Self {
+    let mut proto = State::new();
+    proto.load_lib();
+    let message_handlers = get_message_handlers();
+    for (name, _) in message_handlers.iter() {
+      proto.message_add(name);
+    }
+    for val in lib {
+      eval_s(val, &mut proto);
+    }
+    Self {
+      procs: Vec::new(),
+      proto,
+      access,
+      message_handlers,
+    }
+  }
+
   pub fn new_load(access: AutoNdx) -> Self {
     let mut result = Self::new(access);
     result.interrupt(AutoNdx(0), p("(load \"assets/cnvr/load.cnvr\")"));
