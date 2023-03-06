@@ -1,5 +1,6 @@
-use bevy::{prelude::*, window::{CompositeAlphaMode, PresentMode, CursorGrabMode}};
-use bevy_inspector_egui::quick::WorldInspectorPlugin;
+use bevy::prelude::*;
+//use bevy::window::{CompositeAlphaMode, PresentMode, CursorGrabMode};
+//use bevy_inspector_egui::quick::WorldInspectorPlugin;
 
 use crate::model::world::RS98WorldPlugin;
 use crate::program::program::RS98ProgramPlugin;
@@ -13,8 +14,8 @@ pub struct SSCamera;
 pub struct SSPost;
 
 pub fn start_app() {
-  App::new()
-    .add_startup_stage(SSPost, SystemStage::parallel())
+  let mut app = App::new();
+  app.add_startup_stage(SSPost, SystemStage::parallel())
     .add_startup_stage_after(SSPost, SSCamera, SystemStage::parallel())
 
     // Anti-aliasing
@@ -28,7 +29,6 @@ pub fn start_app() {
           //present_mode: PresentMode::AutoVsync, // vsync
           cursor_visible: true,
           //cursor_grab_mode: CursorGrabMode::Confined,
-          //anti-aliasing
           ..default()
         },
         ..default()
@@ -40,14 +40,16 @@ pub fn start_app() {
 
     )
 
-    //.add_plugin(WorldInspectorPlugin)
     .add_plugin(RS98WorldPlugin)
     .add_plugin(RS98ProgramPlugin)
     .add_plugin(RS98InputPlugin)
-    //.add_plugin(RS98PostPlugin) // comment out this line to disable post-processing
     .add_plugin(RS98CameraPlugin)
     .add_plugin(RS98TextPlugin)
-    .add_plugin(RS98EntitiesPlugin)
+    .add_plugin(RS98EntitiesPlugin);
 
-    .run();
+  if false {
+    //app.add_plugin(WorldInspectorPlugin);
+    app.add_plugin(RS98PostPlugin);
+  }
+  app.run();
 }

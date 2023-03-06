@@ -1,7 +1,7 @@
 use bevy::{prelude::*, render::camera::RenderTarget, window::Windows};
 use conniver::p;
 
-use crate::{model::{world::World, auto::AutoNdx, act::Action}, program::program::ProgramSpace};
+use crate::{program::program::ProgramSpace};
 
 use super::camera::CameraTarget;
 

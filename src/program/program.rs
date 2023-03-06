@@ -29,7 +29,7 @@ pub fn update_program(
 pub fn process_messages(
   mut program: ResMut<ProgramSpace>,
   mut world: ResMut<World>,
-  time: Res<Time>,
+  _time: Res<Time>,
 ) {
   program.process_messages(&mut world);
 }
@@ -60,6 +60,7 @@ impl ProgramSpace {
     }
   }
 
+  #[cfg(test)]
   pub fn new_lib_override(access: AutoNdx, lib: &Vec<Val>) -> Self {
     let mut proto = State::new();
     proto.load_lib();
@@ -96,12 +97,13 @@ impl ProgramSpace {
     }
   }
 
+  #[cfg(test)]
   pub fn set_program(&mut self, robo: AutoNdx, p: Val) {
     self.ensure_size(robo.0);
     self.procs[robo.0].set_program(p);
   }
 
-  pub fn update(&mut self, dur: f64) {
+  pub fn update(&mut self, _dur: f64) {
     for state in &mut self.procs {
       if state.running() {
         state.run();
@@ -136,6 +138,7 @@ impl ProgramSpace {
     self.procs[robo.0].interrupt(message);
   }
 
+  #[cfg(test)]
   pub fn idle(&self, robo: AutoNdx) -> bool {
     if self.procs.len() <= robo.0 {
       return true;

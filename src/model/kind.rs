@@ -34,6 +34,7 @@ impl Kinds {
     kinds
   }
 
+  #[cfg(test)]
   pub fn new_test() -> Kinds {
     let mut kinds: Vec<KindData> = vec![];
     kinds.push(KindData { 

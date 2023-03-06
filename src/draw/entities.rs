@@ -83,7 +83,7 @@ pub fn update_entity(
   } else if kind != Kind(0) {
     let data = world.kinds.get_data(kind);
     let scene = ass.load(data.scene.clone());
-    let mut transform = Transform::from_translation(loc);
+    let transform = Transform::from_translation(loc);
     //transform.rotate(Quat::from_rotation_x(PI/2.0));
     let entity = commands.spawn((
       SceneBundle {
@@ -192,7 +192,6 @@ pub fn update_entities(
       },
       TrackedEntity::Item(auto_ndx, loc) => {
         let auto = world.get_auto(auto_ndx);
-        let auto_loc = auto.loc.as_vec2().extend(0.0);
         let item = auto.items[loc];
         let loc = auto.ndx_to_loc(loc).as_vec2().extend(0.0);
         let loc = loc + Vec3::new(0.0, 0.0, 0.0);
@@ -277,6 +276,7 @@ impl Plugin for RS98EntitiesPlugin {
   }
 }
 
+/* 
 pub fn read_holding_points(
   mut ev_tex: EventReader<AssetEvent<Scene>>,
   mut assets: ResMut<Assets<Scene>>,
@@ -318,3 +318,4 @@ pub fn read_holding_points(
   }
 
 }
+*/

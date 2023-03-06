@@ -1,5 +1,5 @@
 
-use bevy::{prelude::{IVec2, Resource, Plugin, App, ResMut, Res, Vec3}, time::Time};
+use bevy::{prelude::{IVec2, Resource, Plugin, App, ResMut, Res}, time::Time};
 use conniver::Val;
 
 use crate::model::{auto::{Auto, AutoNdx}, kind::{Kind, Kinds}, act::Action, pattern::{Pattern, Patterns}, slot::Slot};
@@ -15,7 +15,7 @@ impl World {
   pub fn new_blank() -> World {
     let kinds = Kinds::new_blank();
     let mut world = World {
-      patterns: Patterns::new_blank(&kinds),
+      patterns: Patterns::new_blank(),
       kinds,
       autos: vec![],
     };
@@ -27,6 +27,7 @@ impl World {
     world
   }
 
+  #[cfg(test)]
   pub fn new_test() -> World {
     let kinds = Kinds::new_test();
     let mut world = World {
@@ -42,6 +43,7 @@ impl World {
     world
   }
 
+  /*#[cfg(test)]
   pub fn new_lab() -> World {
     let kinds = Kinds::new_test();
     let dim = IVec2::new(50, 50);
@@ -91,7 +93,7 @@ impl World {
     world.set_item(earth, IVec2::new(3, 2), world.kinds.get("rock"));
 
     world
-  }
+  }*/
 
   pub fn create_auto(&mut self, new: Auto) -> AutoNdx {
     let new = new.initalize(&self.kinds);
@@ -138,6 +140,7 @@ impl World {
     auto.action
   }
 
+  #[cfg(test)]
   pub fn stall_message(&self, auto: AutoNdx) -> Option<String> {
     let auto = self.get_auto(auto);
     auto.stall_message.clone()
@@ -182,6 +185,7 @@ impl World {
     auto.action_time = 0.0;
   }
 
+  #[cfg(test)]
   pub fn set_tile(&mut self, space: AutoNdx, loc: IVec2, kind: Kind) {
     let space = self.get_auto_mut(space);
     let ndx = space.get_ndx(loc);
@@ -224,6 +228,7 @@ impl World {
     }
   }
 
+  #[cfg(test)]
   pub fn set_all_tiles(&mut self, space_ndx: AutoNdx, tile_kind: Kind) {
     let space = self.get_auto(space_ndx);
     let dim = space.dim;
@@ -242,10 +247,6 @@ impl World {
 
   pub fn get_pattern(&self, kind: Kind, holding: &Vec<Kind>) -> Option<Pattern> {
     self.patterns.get(kind, holding)
-  }
-
-  pub fn vec_to_ivec(&self, _: AutoNdx, vec: Vec3) -> IVec2 {
-    IVec2::new(vec.x as i32, vec.y as i32)
   }
 }
 

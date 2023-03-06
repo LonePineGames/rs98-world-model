@@ -1,6 +1,6 @@
 
 use bevy::prelude::IVec2;
-use conniver::{State, p};
+use conniver::{p};
 
 use crate::model::{auto::{AutoNdx, Auto}, world::World, act::Action, dir::Dir};
 

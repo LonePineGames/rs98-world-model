@@ -1,7 +1,9 @@
-use bevy::prelude::IVec2;
-use conniver::{p, val::p_all};
+#![cfg(test)]
 
-use crate::{model::{world::World, auto::{AutoNdx, Auto}, act::Action, kind::Kind, dir::Dir}, program::{program::ProgramSpace}};
+use bevy::prelude::IVec2;
+use conniver::{val::p_all, p};
+
+use crate::{model::{world::World, auto::{AutoNdx, Auto}, act::Action, kind::Kind}, program::{program::ProgramSpace}};
 
 fn run100(world: &mut World, program: &mut ProgramSpace, robo: AutoNdx, expected_steps: i32) {
   let mut steps = 0;
@@ -269,38 +271,39 @@ fn test_access() {
   assert_eq!(program.access, robo);
 }
 
-fn test_mass_produce() {
-  let mut world = World::new_blank();
-  let space = AutoNdx(0);
-  let mut program = ProgramSpace::new(space);
+// #[test]
+// fn test_mass_produce() {
+//   let mut world = World::new_blank();
+//   let space = AutoNdx(0);
+//   let mut program = ProgramSpace::new(space);
 
-  program.interrupt(space, p("(do 
-    (define-kind rock
-      (traction 1)
-    )
-    (define-kind grass
-      (traction 1)
-    )
-    (define-kind earth
-      (traction 1)
-    )
-    (define-kind robo
-      (traction 1)
-    )
-    (define earth-auto (create-auto 
-      (kind earth)
-      (loc 0 0)
-      (parent 0)
-      (dim 50 50)
-      (tile grass)
-    ))
-    (define player (create-auto 
-      (kind robo)
-      (loc 10 10)
-      (parent earth-auto)
-      (dim 1 1)
-    ))
-    (access player)
-    (set-item earth-auto 10 10 rock)
-  )"));
-}
+//   program.interrupt(space, p("(do 
+//     (define-kind rock
+//       (traction 1)
+//     )
+//     (define-kind grass
+//       (traction 1)
+//     )
+//     (define-kind earth
+//       (traction 1)
+//     )
+//     (define-kind robo
+//       (traction 1)
+//     )
+//     (define earth-auto (create-auto 
+//       (kind earth)
+//       (loc 0 0)
+//       (parent 0)
+//       (dim 50 50)
+//       (tile grass)
+//     ))
+//     (define player (create-auto 
+//       (kind robo)
+//       (loc 10 10)
+//       (parent earth-auto)
+//       (dim 1 1)
+//     ))
+//     (access player)
+//     (set-item earth-auto 10 10 rock)
+//   )"));
+// }

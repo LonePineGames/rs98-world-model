@@ -2,6 +2,7 @@ use bevy::prelude::IVec2;
 
 use crate::model::{kind::Kind, world::World, auto::AutoNdx, dir::Dir, route::route, slot::Slot};
 
+#[allow(dead_code)]
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Hash)]
 pub enum Action {
   #[default]

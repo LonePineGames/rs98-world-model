@@ -1,4 +1,8 @@
-use crate::model::kind::{Kind, Kinds};
+
+use crate::model::kind::{Kind};
+
+#[cfg(test)]
+use crate::model::kind::Kinds;
 
 #[derive(Clone, Default, Debug)]
 pub struct Pattern {
@@ -23,10 +27,11 @@ pub struct Patterns {
 }
 
 impl Patterns {
-  pub fn new_blank(kinds: &Kinds) -> Patterns {
+  pub fn new_blank() -> Patterns {
     Patterns { patterns: vec![] }
   }
 
+  #[cfg(test)]
   pub fn new_test(kinds: &Kinds) -> Patterns {
     Patterns {
       patterns: vec![
@@ -68,6 +73,7 @@ impl Patterns {
     None
   }
 
+  #[cfg(test)]
   pub fn len(&self) -> usize {
     self.patterns.len()
   }

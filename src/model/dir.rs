@@ -21,19 +21,19 @@ impl Dir {
     }
   }
 
-  pub fn from_ivec2(auto_loc: IVec2) -> Dir {
-    if auto_loc.x > 0 {
-      Dir::East
-    } else if auto_loc.x < 0 {
-      Dir::West
-    } else if auto_loc.y > 0 {
-      Dir::North
-    } else if auto_loc.y < 0 {
-      Dir::South
-    } else {
-      Dir::None
-    }
-  }
+  // pub fn from_ivec2(auto_loc: IVec2) -> Dir {
+  //   if auto_loc.x > 0 {
+  //     Dir::East
+  //   } else if auto_loc.x < 0 {
+  //     Dir::West
+  //   } else if auto_loc.y > 0 {
+  //     Dir::North
+  //   } else if auto_loc.y < 0 {
+  //     Dir::South
+  //   } else {
+  //     Dir::None
+  //   }
+  // }
 
   pub fn from_str(c: &str) -> Dir {
     match c {
