@@ -1,6 +1,6 @@
 use bevy::prelude::IVec2;
 
-use crate::model::{kind::Kind, world::World, auto::AutoNdx, dir::Dir, route::route};
+use crate::model::{kind::Kind, world::World, auto::AutoNdx, dir::Dir, route::route, slot::Slot};
 
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Hash)]
 pub enum Action {
@@ -46,6 +46,8 @@ impl Action {
         let auto_data = world.get_auto(auto_ndx);
         let loc = auto_data.loc;
         let parent = auto_data.parent;
+        let item_kind_name = &world.kinds.get_data(*item).name.clone();
+        let source_kind_name = &world.kinds.get_data(*source).name.clone();
 
         if source == &world.kinds.nothing() {
           if world.has_item(parent, loc) {
@@ -53,27 +55,27 @@ impl Action {
             world.set_item(parent, loc, world.kinds.nothing());
             world.set_item(auto_ndx, IVec2::new(0, 0), item);
             world.finish_auto_action(auto_ndx);
-            println!("Picked up {:?} from ground.", item);
+            println!("Picked up {} from ground.", item_kind_name);
             None
           } else {
-            Some(format!("Could not find {:?} on ground.", item))
+            Some(format!("Could not find {} on ground.", item_kind_name))
           }
         } else {
-          for other_ndx in world.get_autos_at(parent, loc) {
+          for Slot(other_ndx, pick_loc) in world.get_slots(parent, loc) {
             let other = world.get_auto(other_ndx);
             if other.kind == *source {
-              let holding = world.get_item(other_ndx, IVec2::new(0, 0));
+              let holding = world.get_item(other_ndx, pick_loc);
               if holding == *item {
-                world.set_item(other_ndx, IVec2::new(0, 0), world.kinds.nothing());
-                world.set_item(auto_ndx, IVec2::new(0, 0), holding);
+                world.set_item(other_ndx, pick_loc, world.kinds.nothing());
+                world.set_item(auto_ndx, pick_loc, holding);
                 world.finish_auto_action(auto_ndx);
                 return None;
               } else {
-                return Some(format!("Could not find {:?} in {:?}.", item, source));
+                return Some(format!("Could not find {} in {}.", item_kind_name, source_kind_name));
               }
             }
           }
-          Some(format!("Could not find {:?} at {:?}.", source, loc))
+          Some(format!("Could not find {} at {}.", source_kind_name, loc))
           
         }
 
@@ -96,18 +98,18 @@ impl Action {
         let parent = auto_data.parent;
         let mut target = None;
         if dest == &world.kinds.nothing() {
-          target = Some((parent, loc));
+          target = Some(Slot(parent, loc));
         } else {
-          for other_ndx in world.get_autos_at(parent, loc) {
+          for Slot(other_ndx, place_loc) in world.get_slots(parent, loc) {
             let other = world.get_auto(other_ndx);
             if other.kind == *dest {
-              target = Some((other_ndx, IVec2::new(0, 0)));
+              target = Some(Slot(other_ndx, place_loc));
               break;
             }
           }
         }
 
-        if let Some((target_ndx, target_loc)) = target {
+        if let Some(Slot(target_ndx, target_loc)) = target {
           if world.has_item(target_ndx, target_loc) {
             return Some("Location is not empty.".to_owned())
           } else {
@@ -117,7 +119,8 @@ impl Action {
             return None;
           }
         } else {
-          return Some(format!("Could not find {:?} in {:?}.", dest, auto_ndx))
+          let dest_name = &world.kinds.get_data(*dest).name;
+          return Some(format!("Could not find {}.", dest_name))
         }
       }
 
@@ -139,6 +142,7 @@ impl Action {
       Action::Produce => {
         let auto_data = world.get_auto(auto_ndx);
         let holding = world.get_items(auto_ndx);
+        println!("holding: {:?}", holding);
         let pattern = world.get_pattern(auto_data.kind, &holding);
         if let Some(pattern) = pattern {
           for (ndx, kind) in pattern.output.iter().enumerate() {

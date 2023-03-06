@@ -21,8 +21,13 @@ impl Patterns {
       patterns: vec![
         Pattern {
           only: kinds.get("machine"),
-          input: vec![kinds.get("rock")],
-          output: vec![kinds.get("thing")],
+          input: vec![kinds.get("rock"), Kind(0)],
+          output: vec![kinds.get("thing"), Kind(0)],
+        },
+        Pattern {
+          only: kinds.get("machine"),
+          input: vec![kinds.get("thing"), kinds.get("rock")],
+          output: vec![kinds.get("widget"), Kind(0)], 
         },
       ],
     }

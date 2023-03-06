@@ -2,7 +2,7 @@
 use bevy::{prelude::{IVec2, Resource, Plugin, App, ResMut, Res, Vec3}, time::Time};
 use conniver::Val;
 
-use crate::model::{auto::{Auto, AutoNdx}, kind::{Kind, Kinds}, act::Action, pattern::{Pattern, Patterns}};
+use crate::model::{auto::{Auto, AutoNdx}, kind::{Kind, Kinds}, act::Action, pattern::{Pattern, Patterns}, slot::Slot};
 
 #[derive(Resource)]
 pub struct World {
@@ -190,11 +190,18 @@ impl World {
     }
   }
 
-  pub fn get_autos_at(&self, parent_ndx: AutoNdx, loc: IVec2) -> Vec<AutoNdx> {
+  pub fn get_slots(&self, parent_ndx: AutoNdx, loc: IVec2) -> Vec<Slot> {
     let mut ndxes = vec![];
     for (ndx, auto) in self.autos.iter().enumerate() {
-      if auto.parent == parent_ndx && auto.loc == loc {
-        ndxes.push(AutoNdx(ndx));
+      if auto.parent != parent_ndx {
+        continue;
+      }
+      let dim = auto.dim;
+      let kind_name = self.kinds.get_data(auto.kind).name.clone();
+      println!("{} {}: {:?} {:?} {:?}", kind_name, ndx, loc, auto.loc, dim);
+      let loc = loc - auto.loc;
+      if loc.x >= 0 && loc.x < dim.x && loc.y >= 0 && loc.y < dim.y {
+        ndxes.push(Slot(AutoNdx(ndx), loc));
       }
     }
     ndxes

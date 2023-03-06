@@ -90,6 +90,12 @@ impl Kinds {
       item_dim: IVec2::new(2, 1),
       traction: 5,
     });
+    kinds.push(KindData {
+      name: "widget".to_string(),
+      scene: "model/widget.glb#Scene0".to_string(),
+      item_dim: IVec2::new(1, 1),
+      traction: 5,
+    });
     let mut kinds_by_name = HashMap::new();
     for (i, kind) in kinds.iter().enumerate() {
       kinds_by_name.insert(kind.name.clone(), Kind(i));
