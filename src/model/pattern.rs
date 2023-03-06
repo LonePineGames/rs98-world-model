@@ -1,12 +1,23 @@
 use crate::model::kind::{Kind, Kinds};
 
-#[derive(Clone, Default)]
+#[derive(Clone, Default, Debug)]
 pub struct Pattern {
-  pub only: Kind,
+  pub for_kind: Kind,
   pub input: Vec<Kind>,
   pub output: Vec<Kind>,
 }
 
+impl Pattern {
+  pub fn new() -> Pattern {
+    Pattern {
+      for_kind: Kind(1),
+      input: vec![],
+      output: vec![],
+    }
+  }
+}
+
+#[derive(Debug)]
 pub struct Patterns {
   pub patterns: Vec<Pattern>,
 }
@@ -20,12 +31,12 @@ impl Patterns {
     Patterns {
       patterns: vec![
         Pattern {
-          only: kinds.get("machine"),
+          for_kind: kinds.get("machine"),
           input: vec![kinds.get("rock"), Kind(0)],
           output: vec![kinds.get("thing"), Kind(0)],
         },
         Pattern {
-          only: kinds.get("machine"),
+          for_kind: kinds.get("machine"),
           input: vec![kinds.get("thing"), kinds.get("rock")],
           output: vec![kinds.get("widget"), Kind(0)], 
         },
@@ -33,9 +44,13 @@ impl Patterns {
     }
   }
 
+  pub fn add(&mut self, pattern: Pattern) {
+    self.patterns.push(pattern);
+  }
+
   pub fn get(&self, kind: Kind, holding: &Vec<Kind>) -> Option<Pattern> {
     for pattern in &self.patterns {
-      if pattern.only == kind {
+      if pattern.for_kind == kind {
         if pattern.input.len() == holding.len() {
           let mut found = true;
           for (i, input) in pattern.input.iter().enumerate() {
@@ -51,5 +66,9 @@ impl Patterns {
       }
     }
     None
+  }
+
+  pub fn len(&self) -> usize {
+    self.patterns.len()
   }
 }

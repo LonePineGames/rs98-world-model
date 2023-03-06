@@ -166,13 +166,56 @@ fn test_load() {
   assert_eq!(world.get_tile(earth, IVec2::new(0, 0)), world.kinds.get("grass"));
   assert_eq!(world.get_item(earth, IVec2::new(10, 10)), rock);
 
-  let robo = AutoNdx(2);
-  let robo_data = world.get_auto(robo);
-  assert_eq!(robo_data.kind, world.kinds.get("robo"));
+  let robo = world.kinds.get("robo");
+  let robo_auto = AutoNdx(2);
+  let robo_data = world.get_auto(robo_auto);
+  assert_eq!(robo_data.kind, robo);
   assert_eq!(robo_data.loc, IVec2::new(10, 10));
   assert_eq!(robo_data.parent, earth);
-  assert_eq!(program.access, robo);
+  assert_eq!(program.access, robo_auto);
+}
 
+#[test]
+fn test_define_pattern() {
+  let mut world = World::new_blank(); 
+  let space = AutoNdx(0);
+  let mut program = ProgramSpace::new(AutoNdx(0));
+
+  program.interrupt(space, p("(do 
+    (define-kind rock
+      (traction 1)
+    )
+    (define-kind grass
+      (traction 1)
+    )
+    (define-kind robo
+      (traction 1)
+    )
+    (define-pattern
+      (for robo)
+      (in (nothing nothing nothing grass grass grass nothing nothing nothing))
+      (out (nothing nothing nothing grass rock grass nothing nothing nothing))
+    )
+  )"));
+
+  run100(&mut world, &mut program, space, -1);
+  assert_eq!(world.patterns.len(), 1);
+  
+  let rock = world.kinds.get("rock");
+  let robo = world.kinds.get("robo");
+  let nothing = world.kinds.get("nothing");
+  let grass = world.kinds.get("grass");
+
+  let pattern = world.patterns.get(robo, &vec![nothing, nothing, nothing, grass, grass, grass, nothing, nothing, nothing]);
+  if let Some(pattern) = pattern {
+    assert_eq!(pattern.output, vec![
+      nothing, nothing, nothing,
+      grass, rock, grass,
+      nothing, nothing, nothing,
+    ]);
+  } else {
+    assert!(false);
+  }
 }
 
 #[test]
@@ -196,6 +239,38 @@ fn test_access() {
   assert_eq!(program.access, robo);
 }
 
-fn test_shell_display() {
-  
+fn test_mass_produce() {
+  let mut world = World::new_blank();
+  let space = AutoNdx(0);
+  let mut program = ProgramSpace::new(space);
+
+  program.interrupt(space, p("(do 
+    (define-kind rock
+      (traction 1)
+    )
+    (define-kind grass
+      (traction 1)
+    )
+    (define-kind earth
+      (traction 1)
+    )
+    (define-kind robo
+      (traction 1)
+    )
+    (define earth-auto (create-auto 
+      (kind earth)
+      (loc 0 0)
+      (parent 0)
+      (dim 50 50)
+      (tile grass)
+    ))
+    (define player (create-auto 
+      (kind robo)
+      (loc 10 10)
+      (parent earth-auto)
+      (dim 1 1)
+    ))
+    (access player)
+    (set-item earth-auto 10 10 rock)
+  )"));
 }
