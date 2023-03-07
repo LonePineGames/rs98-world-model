@@ -2,6 +2,7 @@ use std::collections::HashMap;
 
 use bevy::prelude::IVec2;
 use conniver::{Val, object::read_string, read_object};
+use conniver::{Val, object::read_string};
 
 use crate::model::{auto::AutoNdx, world::World, act::Action, kind::Kind, dir::Dir, pattern::Pattern};
 
@@ -139,45 +140,8 @@ pub fn get_message_handlers() -> HashMap<String, MessageHandler> {
       return Some(Val::String("usage: (define-pattern (for ...) (in ...) (out ...) ...)".to_owned()));
     }
 
-    let props = Val::List(args[1..].to_vec());
-    let mut pattern = Pattern::new();
-    pattern.for_kind = Kind(1);
-    let mut in_out = vec![vec![], vec![]];
-    let mut bad = false;
-    read_object(&props, |key, val| {
-      if key == "in" || key == "out" {
-        let ndx = if key == "in" { 0 } else { 1 };
-        if let Val::List(list) = val {
-          in_out[ndx] = list.clone();
-        } else {
-          bad = true;
-        }
-      } else if key == "for" {
-        if let Val::Sym(kind) = val {
-          pattern.for_kind = world.kinds.get(kind);
-        } else {
-          println!("bad only: {:?}", val);
-          bad = true;
-        }
-      }
-    });
-    if bad {
-      return Some(Val::String("usage: (define-pattern (for ...) (in ...) (out ...) ...)".to_owned()));
-    }
-
-    let in_out = in_out.into_iter().map(|v| {
-      v.into_iter().map(|v| {
-        if let Val::Sym(kind) = v {
-          world.kinds.get(&kind)
-        } else {
-          Kind(1)
-        }
-      }).collect()
-    }).collect::<Vec<Vec<Kind>>>();
-
-    pattern.input = in_out[0].clone();
-    pattern.output = in_out[1].clone();
-
+    let args = Val::List(args[1..].to_vec());
+    let pattern = Pattern::from_val(&args, world);
     world.patterns.add(pattern);
     Some(Val::nil())
   });
