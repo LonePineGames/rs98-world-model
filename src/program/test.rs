@@ -282,6 +282,78 @@ fn test_access() {
   assert_eq!(program.access, robo);
 }
 
+#[test]
+fn test_automine() {
+  let mut world = World::new_blank(); 
+  let space = AutoNdx(0);
+  let mut program = ProgramSpace::new(AutoNdx(0));
+
+  program.interrupt(space, p("(do 
+    (define-kind rock
+      (traction 1)
+    )
+    (define-kind grass
+      (traction 1)
+    )
+    (define-kind earth
+      (traction 1)
+    )
+    (define-kind robo
+      (traction 5)
+    )
+    (define-kind automine
+      (dim 1 1)
+      (program '(loop (set-item me 0 0 rock)))
+    )
+
+    (define earth-auto (create-auto 
+      (kind earth)
+      (loc 0 0)
+      (parent 0)
+      (dim 50 50)
+      (tile grass)
+    ))
+    
+    (create-auto 
+      (kind robo)
+      (loc 10 10)
+      (parent earth-auto)
+      (dim 1 1)
+    )
+    (create-auto 
+      (kind automine)
+      (loc 10 10)
+      (parent earth-auto)
+      (dim 1 1)
+    )
+  )"));
+  run100(&mut world, &mut program, space, -1);
+
+  assert_eq!(world.autos.len(), 4);
+  let automine_auto = AutoNdx(3);
+  let robo_auto = AutoNdx(2);
+  let automine = world.kinds.get("automine");
+  let rock = world.kinds.get("rock");
+  let nothing = world.kinds.get("nothing");
+
+  assert_eq!(world.get_auto(automine_auto).kind, world.kinds.get("automine"));
+  assert_eq!(world.get_auto(robo_auto).kind, world.kinds.get("robo"));
+  assert_eq!(world.get_auto(automine_auto).loc, IVec2::new(10, 10));
+  assert_eq!(world.get_auto(robo_auto).loc, IVec2::new(10, 10));
+
+  assert_eq!(world.get_item(automine_auto, IVec2::new(0, 0)), nothing);
+  assert_eq!(world.get_item(robo_auto, IVec2::new(0, 0)), nothing);
+
+  world.set_auto_action(robo_auto, Action::Pick(rock, automine));
+  run100(&mut world, &mut program, robo_auto, 1);
+  assert_eq!(world.get_item(automine_auto, IVec2::new(0, 0)), nothing);
+  assert_eq!(world.get_item(robo_auto, IVec2::new(0, 0)), rock);
+
+  run1(&mut world, &mut program, 1.0);
+  run1(&mut world, &mut program, 1.0);
+  assert_eq!(world.get_item(automine_auto, IVec2::new(0, 0)), rock);
+}
+
 // #[test]
 // fn test_mass_produce() {
 //   let mut world = World::new_blank();

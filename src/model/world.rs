@@ -124,6 +124,7 @@ impl World {
     auto.get_item(loc)
   }
 
+  #[cfg(test)]
   pub fn has_item(&self, auto: AutoNdx, loc: bevy::prelude::IVec2) -> bool {
     let auto = self.get_auto(auto);
     auto.has_item(loc)

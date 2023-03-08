@@ -36,6 +36,12 @@
 )
 
 (create-auto
+  (kind automine-ore)
+  (loc 15 4)
+  (parent earth-auto)
+)
+
+(create-auto
   (kind pad)
   (loc 12 8)
   (parent earth-auto)

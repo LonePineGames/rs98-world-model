@@ -3,3 +3,25 @@
   (in (ore nothing))
   (out (wire nothing))
 )
+
+(define-pattern
+  (for autoprocessor)
+  (in (bauxite nothing))
+  (out (ingot nothing))
+)
+
+(define-pattern
+  (for autoprocessor)
+  (in (oil water))
+  (out (plastic fuel))
+)
+
+(define-pattern
+  (for pad)
+  (in  (wire    wire    nothing
+        wire    ingot   nothing
+        nothing nothing nothing))
+  (out (nothing nothing nothing
+        nothing motor   nothing
+        nothing nothing nothing))
+)
