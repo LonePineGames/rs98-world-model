@@ -42,7 +42,7 @@ pub fn handle_mouse_input(
   // check if the cursor is inside the window and get its position
   if let Some(screen_pos) = wnd.cursor_position() {
     // get the size of the window
-    let window_size = Vec2::new(wnd.width() as f32, wnd.height() as f32);
+    let window_size = Vec2::new(wnd.width(), wnd.height());
 
     //println!("screen_pos: {:?}", screen_pos);
     // convert screen position [0..resolution] to ndc [-1..1] (gpu coordinates)
@@ -70,7 +70,7 @@ pub fn handle_mouse_input(
 
     if buttons.just_pressed(MouseButton::Left) {
       let event = p(&format!("(input-mouse {} {})", world_pos.x, world_pos.y));
-      println!("event: {:?}", event);
+      println!("event: {event:?}");
       let access = program.access;
       program.interrupt(access, event);
     }
@@ -83,7 +83,7 @@ pub fn handle_keyboard_input(
   mut program: ResMut<ProgramSpace>,
 ) {
   for key in keys.get_pressed() {
-    let event = p(&format!("(input-key {:?})", key));
+    let event = p(&format!("(input-key {key:?})"));
     let access = program.access;
     program.interrupt(access, event);
   }

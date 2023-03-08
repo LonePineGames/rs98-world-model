@@ -78,20 +78,20 @@ impl Auto {
         "parent" => if let Val::Num(i) = val {
           auto.parent = AutoNdx(*i as usize);
         } else {
-          println!("bad parent: {:?}", val);
+          println!("bad parent: {val:?}");
         },
         "tile" => tile_kind = kinds.get(&read_string(val)),
         "dim" => read_ivec2(val, |x, y| {
           auto.dim = IVec2::new(x, y);
         }, || {
-          println!("bad dim: {:?}", val);
+          println!("bad dim: {val:?}");
         }),
         "loc" => read_ivec2(val, |x, y| {
           auto.loc = IVec2::new(x, y);
         }, || {
-          println!("bad loc: {:?}", val);
+          println!("bad loc: {val:?}");
         }),
-        _ => println!("bad auto key: {}", key)
+        _ => println!("bad auto key: {key}")
       }
     });
     auto.initalize(kinds);

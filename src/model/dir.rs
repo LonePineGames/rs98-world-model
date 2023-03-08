@@ -11,7 +11,7 @@ pub enum Dir {
 }
 
 impl Dir {
-  pub(crate) fn to_ivec2(&self) -> IVec2 {
+  pub(crate) fn to_ivec2(self) -> IVec2 {
     match self {
       Dir::North => IVec2::new(0, 1),
       Dir::East => IVec2::new(1, 0),

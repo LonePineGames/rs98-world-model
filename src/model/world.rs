@@ -152,7 +152,7 @@ impl World {
   }
 
   pub fn auto_ndxes(&self) -> Vec<AutoNdx> {
-    (0..self.autos.len()).map(|ndx| AutoNdx(ndx)).collect()
+    (0..self.autos.len()).map(AutoNdx).collect()
   }
 
   pub fn update(&mut self, dur: f64) {
@@ -216,7 +216,7 @@ impl World {
     let auto = self.kinds.get_data(auto);
     let ground = self.get_tile(parent, pos);
     let ground = self.kinds.get_data(ground);
-    return auto.traction > ground.traction;
+    auto.traction > ground.traction
   }
 
   pub fn get_tile(&self, parent: AutoNdx, pos: IVec2) -> Kind {

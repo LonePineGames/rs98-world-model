@@ -125,21 +125,21 @@ impl Kinds {
   }
 
   pub fn set_by_val(&mut self, name: &str, data: Val) {
-    let mut kind_data = KindData::default();
-    kind_data.name = name.to_string();
-
-    if kind_data.name == "" {
-      println!("bad kind: {:?}", data);
+    if name.is_empty() {
+      println!("bad kind: {data:?}");
       return;
     }
 
     // check if we already have this kind
-    let kind = if let Some(kind) = self.kinds_by_name.get(&kind_data.name) {
+    let kind = if let Some(kind) = self.kinds_by_name.get(name) {
       *kind
     } else {
       let kind = Kind(self.kinds.len());
-      self.kinds_by_name.insert(kind_data.name.clone(), kind);
-      self.kinds.push(kind_data);
+      self.kinds_by_name.insert(name.to_string(), kind);
+      self.kinds.push(KindData {
+        name: name.to_string(),
+        ..Default::default()
+      });
       kind
     };
     let kind_data = self.get_data_mut(kind);
@@ -154,7 +154,7 @@ impl Kinds {
           "item" => KindRole::Item,
           "auto" => KindRole::Auto,
           _ => {
-            println!("bad role: {:?}", val);
+            println!("bad role: {val:?}");
             KindRole::Item
           }
         },
@@ -163,13 +163,13 @@ impl Kinds {
         "dim" => read_ivec2(val, |x, y| {
           kind_data.item_dim = IVec2::new(x, y);
         }, || {
-          println!("bad item-dim: {:?}", val);
+          println!("bad item-dim: {val:?}");
         }),
 
         "traction" => if let Val::Num(i) = val {
           kind_data.traction = *i as i32;
         } else {
-          println!("bad traction: {:?}", val);
+          println!("bad traction: {val:?}");
         },
 
         "program" => kind_data.program = val.clone(),

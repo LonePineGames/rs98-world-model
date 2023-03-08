@@ -37,7 +37,7 @@ impl Action {
           let tile = world.get_tile(parent, new_loc);
           let tile_name = &world.kinds.get_data(tile).name;
           let auto_name = &world.kinds.get_data(kind).name;
-          Some(format!("Could not move to ({},{}): {} cannot cross {}.", new_loc.x, new_loc.y, auto_name, tile_name))
+          Some(format!("Could not move to ({},{}): {auto_name} cannot cross {tile_name}.", new_loc.x, new_loc.y))
         }
       }
 
@@ -57,7 +57,7 @@ impl Action {
           } else {
             world.kinds.name(target_kind)
           };
-          println!("Picked up {} from {}.", world.kinds.name(contents), target_name);
+          println!("Picked up {} from {target_name}.", world.kinds.name(contents));
           None
         } else {
           Some(format!("Could not find {} on {}.", world.kinds.action_name(*item), world.kinds.action_name(*source)))
@@ -94,12 +94,13 @@ impl Action {
           } else {
             world.kinds.name(target_kind)
           };
-          println!("Placed {} on {}.", world.kinds.name(holding_kind), target_name);
+          let holding_kind_name = world.kinds.name(holding_kind);
+          println!("Placed {holding_kind_name} on {target_name}.");
           None
 
         } else {
           let dest_name = world.kinds.action_name(*dest);
-          Some(format!("Could not find empty slot on {}.", dest_name))
+          Some(format!("Could not find empty slot on {dest_name}."))
         }
       }
 

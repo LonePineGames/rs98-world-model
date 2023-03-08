@@ -74,8 +74,7 @@ pub fn route(world: &World, auto: AutoNdx, dest: IVec2) -> Dir {
 
   let dir = prev.get(&start).copied();
   if let Some(dir) = dir {
-    let dir = dir.invert();
-    dir
+    dir.invert()
   } else {
     Dir::None
   }

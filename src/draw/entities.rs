@@ -21,6 +21,7 @@ pub struct EntityKind {
   pub kind: Kind,
 }
 
+#[allow(clippy::too_many_arguments)]
 pub fn update_entity(
   tracker: TrackedEntity,
   loc: Vec3,
@@ -45,7 +46,8 @@ pub fn update_entity(
     if kind == Kind(0) {
       commands.entity(entity).despawn_recursive();
       entities.entities_map.remove(&tracker);
-      return;
+      #[allow(clippy::needless_return)]
+      return // this return is to prevent messing with the entity after removing it, which is a source of panics
 
     } else if let Ok((old_kind, mut transform, mut physics)) = q.get_mut(entity) {
 

@@ -30,7 +30,7 @@ impl Pattern {
     pattern.for_kind = Kind(1);
     let mut in_out = vec![vec![], vec![]];
     let mut bad = false;
-    read_object(&val, |key, val| {
+    read_object(val, |key, val| {
       if key == "in" || key == "out" {
         let ndx = if key == "in" { 0 } else { 1 };
         if let Val::List(list) = val {
@@ -42,7 +42,7 @@ impl Pattern {
         if let Val::Sym(kind) = val {
           pattern.for_kind = world.kinds.get(kind);
         } else {
-          println!("bad only: {:?}", val);
+          println!("bad only: {val:?}");
           bad = true;
         }
       }
@@ -101,18 +101,16 @@ impl Patterns {
 
   pub fn get(&self, kind: Kind, holding: &Vec<Kind>) -> Option<Pattern> {
     for pattern in &self.patterns {
-      if pattern.for_kind == kind {
-        if pattern.input.len() == holding.len() {
-          let mut found = true;
-          for (i, input) in pattern.input.iter().enumerate() {
-            if *input != holding[i] {
-              found = false;
-              break;
-            }
+      if pattern.for_kind == kind && pattern.input.len() == holding.len() {
+        let mut found = true;
+        for (i, input) in pattern.input.iter().enumerate() {
+          if *input != holding[i] {
+            found = false;
+            break;
           }
-          if found {
-            return Some(pattern.clone());
-          }
+        }
+        if found {
+          return Some(pattern.clone());
         }
       }
     }

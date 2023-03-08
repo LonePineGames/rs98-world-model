@@ -68,7 +68,7 @@ pub fn get_message_handlers() -> HashMap<String, MessageHandler> {
   });
 
   handlers.insert("print".to_string(), |args, _, _, _| {
-    println!("{}", args[1..].iter().map(|v| read_string(v)).collect::<Vec<String>>().join(""));
+    println!("{}", args[1..].iter().map(read_string).collect::<Vec<String>>().join(""));
     Some(Val::nil())
   });
 
@@ -77,7 +77,7 @@ pub fn get_message_handlers() -> HashMap<String, MessageHandler> {
       return Some(Val::String("usage: (move auto dir)".to_owned()));
     }
     let dir = if let Val::Sym(dir) = &args[1] {
-      Dir::from_str(&dir)
+      Dir::from_str(dir)
     } else {
       return Some(Val::String("usage: (move auto dir)".to_owned()));
     };
@@ -145,7 +145,7 @@ pub fn get_message_handlers() -> HashMap<String, MessageHandler> {
   });
 
   handlers.insert("create-auto".to_string(), |args, program, world, _| {
-    if args.len() < 1 {
+    if args.is_empty() {
       return Some(Val::String("usage: (create-auto (name x) ...)".to_owned()));
     }
     let args = Val::List(args[1..].to_vec());
@@ -155,7 +155,7 @@ pub fn get_message_handlers() -> HashMap<String, MessageHandler> {
   });
 
   handlers.insert("access".to_string(), |args, program, _, _| {
-    if args.len() < 1 {
+    if args.is_empty() {
       return Some(Val::String("usage: (access auto)".to_owned()));
     }
     let auto = if let Val::Num(auto) = &args[1] {
