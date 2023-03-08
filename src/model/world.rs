@@ -172,9 +172,9 @@ impl World {
         let auto = self.get_auto_mut(ndx);
         auto.stall_message = stall_message;
         let auto = self.get_auto(ndx);
-        if let Some(message) = &auto.stall_message {
-          println!("{}: {}", self.kinds.get_data(auto.kind).name, message);
-        }
+        // if let Some(message) = &auto.stall_message {
+        //   println!("{}: {}", self.kinds.get_data(auto.kind).name, message);
+        // }
       }
     }
   }

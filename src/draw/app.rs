@@ -47,7 +47,7 @@ pub fn start_app() {
     .add_plugin(RS98TextPlugin)
     .add_plugin(RS98EntitiesPlugin);
 
-  if false {
+  if false { // todo, add configuration
     //app.add_plugin(WorldInspectorPlugin);
     app.add_plugin(RS98PostPlugin);
   }

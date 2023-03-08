@@ -14,7 +14,6 @@ pub fn get_message_handlers() -> HashMap<String, MessageHandler> {
   let mut handlers = HashMap::<String, MessageHandler>::new();
 
   handlers.insert("item-at".to_string(), |args, _, world, _| {
-    println!("item-at: {:?}", args);
     if args.len() < 4 {
       return Some(Val::String("usage: (item-at auto x y)".to_owned()));
     }
@@ -35,13 +34,11 @@ pub fn get_message_handlers() -> HashMap<String, MessageHandler> {
     };
     let pos = IVec2::new(x, y);
     let item = world.get_item(auto, pos);
-    println!("item-at: {:?}", item);
     let item_name = world.kinds.get_data(item).name.clone();
     Some(Val::String(item_name))
   });
 
   handlers.insert("set-item".to_string(), |args, _, world, _| {
-    println!("set-item: {:?}", args);
     if args.len() < 5 {
       return Some(Val::String("usage: (set-item auto x y kind)".to_owned()));
     }
@@ -71,12 +68,10 @@ pub fn get_message_handlers() -> HashMap<String, MessageHandler> {
   });
 
   handlers.insert("print".to_string(), |args, _, _, _| {
-    println!("{}", args[1..].iter().map(|v| read_string(v)).collect::<Vec<String>>().join(""));
     Some(Val::nil())
   });
 
   handlers.insert("move".to_string(), |args, _, world, auto| {
-    println!("move: {:?}", args);
     if args.len() < 2 {
       return Some(Val::String("usage: (move auto dir)".to_owned()));
     }
@@ -89,7 +84,6 @@ pub fn get_message_handlers() -> HashMap<String, MessageHandler> {
   });
 
   handlers.insert("goto".to_string(), |args, _, world, auto| {
-    println!("goto: {:?}", args);
     if args.len() < 3 {
       return Some(Val::String("usage: (goto auto x y)".to_owned()));
     }

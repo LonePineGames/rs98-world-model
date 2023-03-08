@@ -392,7 +392,7 @@ fn test_produce() {
   world.update(2.0);
   assert_eq!(world.stall_message(robo), None);
   assert_eq!(world.get_item(machine_ndx, IVec2::new(1, 0)), rock);
-  println!("machine holding: {:?}", world.get_items(machine_ndx));
+  assert_eq!(world.get_items(machine_ndx), vec![world.kinds.get("thing"), rock]);
 
   // machine produces widget
   world.set_auto_action(machine_ndx, Action::Produce);
@@ -540,8 +540,6 @@ fn test_kind_names() {
   let nothing = kinds.get("nothing");
   let missingno = kinds.get("missingno");
   let robo = kinds.get("robo");
-
-  println!("nothing: {:?}", nothing);
 
   assert_eq!(kinds.name(nothing), "nothing");
   assert_eq!(kinds.name(missingno), "missingno");

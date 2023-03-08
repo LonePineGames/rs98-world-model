@@ -36,14 +36,32 @@
 )
 
 (create-auto
+  (kind pad)
+  (loc 12 8)
+  (parent earth-auto)
+)
+
+(create-auto
   (kind automine-ore)
   (loc 15 4)
   (parent earth-auto)
 )
 
 (create-auto
-  (kind pad)
-  (loc 12 8)
+  (kind automine-bauxite)
+  (loc 17 4)
+  (parent earth-auto)
+)
+
+(create-auto
+  (kind automine-quartz)
+  (loc 19 4)
+  (parent earth-auto)
+)
+
+(create-auto
+  (kind automine-fluorite)
+  (loc 21 4)
   (parent earth-auto)
 )
 

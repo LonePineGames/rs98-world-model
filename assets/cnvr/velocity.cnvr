@@ -17,4 +17,6 @@
   (set-program ('goto x y))
 )
 
+(define (create x) (set-item me 0 0 x))
+
 (load "assets/cnvr/user.cnvr")

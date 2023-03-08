@@ -17,8 +17,6 @@ pub enum Action {
 
 impl Action {
   pub fn act(&self, world: &mut World, auto_ndx: AutoNdx) -> Option<String> {
-    let loc = world.get_auto(auto_ndx).loc;
-    println!("Action: {:?} {}x{}", self, loc.x, loc.y);
     match self {
       Action::Stop => {
         world.finish_auto_action(auto_ndx);
@@ -185,7 +183,6 @@ impl Action {
       Action::Produce => {
         let auto_data = world.get_auto(auto_ndx);
         let holding = world.get_items(auto_ndx);
-        println!("holding: {:?}", holding);
         let pattern = world.get_pattern(auto_data.kind, &holding);
         if let Some(pattern) = pattern {
           for (ndx, kind) in pattern.output.iter().enumerate() {

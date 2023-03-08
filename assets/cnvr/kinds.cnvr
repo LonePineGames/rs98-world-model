@@ -128,25 +128,25 @@
 (define-kind automine-ore
   (scene "model/automine.glb#Scene0")
   (dim 1 1)
-  (program '(loop (set-item me 0 0 ore)))
+  (program '(loop (create ore)))
 )
 
-(define-kind automine-baux
+(define-kind automine-bauxite
   (scene "model/automine.glb#Scene0")
   (dim 1 1)
-  (program '(loop (set-item me 0 0 bauxite)))
+  (program '(loop (create bauxite)))
 )
 
 (define-kind automine-quartz
   (scene "model/automine.glb#Scene0")
   (dim 1 1)
-  (program '(loop (set-item me 0 0 quartz)))
+  (program '(loop (create quartz)))
 )
 
 (define-kind automine-fluorite
   (scene "model/automine.glb#Scene0")
   (dim 1 1)
-  (program '(loop (set-item me 0 0 fluorite)))
+  (program '(loop (create fluorite)))
 )
 
 (define-kind rcarmack
