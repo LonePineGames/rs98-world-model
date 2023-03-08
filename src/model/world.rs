@@ -171,7 +171,7 @@ impl World {
         let stall_message = action.act(self, ndx);
         let auto = self.get_auto_mut(ndx);
         auto.stall_message = stall_message;
-        let auto = self.get_auto(ndx);
+        // let auto = self.get_auto(ndx);
         // if let Some(message) = &auto.stall_message {
         //   println!("{}: {}", self.kinds.get_data(auto.kind).name, message);
         // }
@@ -201,12 +201,9 @@ impl World {
     for ndx in children {
       let auto = self.get_auto(ndx);
       if auto.parent != parent_ndx {
-        println!("{} != {}", auto.parent.0, parent_ndx.0);
-        continue;
+        panic!("bad parent {} {}", auto.parent.0, parent_ndx.0);
       }
       let dim = auto.dim;
-      let kind_name = self.kinds.get_data(auto.kind).name.clone();
-      println!("{} {:?}: {:?} {:?} {:?}", kind_name, ndx, loc, auto.loc, dim);
       let loc = loc - auto.loc;
       if loc.x >= 0 && loc.x < dim.x && loc.y >= 0 && loc.y < dim.y {
         ndxes.push(Slot(ndx, loc));
@@ -265,16 +262,13 @@ impl World {
         result = Some(Slot(parent_ndx, loc));
       }
     } else {
-      println!("slots: {:?} {:?} {:?}", slots, auto_ndx, parent_ndx);
       for slot in slots {
         if slot.0 == auto_ndx {
           continue;
         }
         let auto = self.get_auto(slot.0);
-        println!("slot: {:?} {:?} {:?}", slot, auto.kind, target_kind);
         if auto.kind.matches(target_kind) {
           let item_there = self.get_item(slot.0, slot.1);
-          println!("item_there: {:?} {:?} {:?}", item_there, item_there, item_kind);
           if item_there.matches(item_kind) && (item_there != Kind(0) || item_kind == Kind(0)) {
             result = Some(slot);
             break;
