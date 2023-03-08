@@ -257,10 +257,13 @@ impl World {
     let parent_ndx = auto.parent;
     let loc = auto.loc;
     let mut result = None;
+    let slots = self.get_slots(parent_ndx, loc);
+    let slots_len = slots.len();
     if target_kind == self.kinds.nothing() {
-      result = Some(Slot(parent_ndx, loc));
+      if slots_len <= 1 {
+        result = Some(Slot(parent_ndx, loc));
+      }
     } else {
-      let slots = self.get_slots(parent_ndx, loc);
       println!("slots: {:?} {:?} {:?}", slots, auto_ndx, parent_ndx);
       for slot in slots {
         if slot.0 == auto_ndx {
@@ -278,7 +281,7 @@ impl World {
         }
       }
 
-      if target_kind == Kind(1) && result.is_none() {
+      if target_kind == Kind(1) && result.is_none() && slots_len <= 1 {
         result = Some(Slot(parent_ndx, loc));
       }
     }

@@ -214,10 +214,15 @@ fn test_pick_filters() {
     ..Auto::default()
   });
 
-  // Place into a machine that isn't there
+  // Place into a kind that isn't there
   world.set_auto_action(robo, Action::Place(rock));
   world.update(2.0);
   assert_eq!(world.stall_message(robo), Some("Could not find empty slot on rock.".to_string()));
+
+  // Cannot place on ground under machine
+  world.set_auto_action(robo, Action::Place(ground));
+  world.update(2.0);
+  assert_eq!(world.stall_message(robo), Some("Could not find empty slot on ground.".to_string()));
 
   // Wildcard place
   world.set_auto_action(robo, Action::Place(wildcard));
@@ -247,6 +252,13 @@ fn test_pick_filters() {
   assert_eq!(world.stall_message(robo), None);
   assert_eq!(world.get_item(machine_ndx, IVec2::new(0, 0)), world.kinds.nothing());
   assert_eq!(world.get_item(robo, IVec2::new(0, 0)), rock);
+
+  // Cannot place on ground under machine
+  world.set_item(machine_ndx, IVec2::new(0, 0), rock);
+  world.set_auto_action(robo, Action::Place(wildcard));
+  world.update(2.0);
+  assert_eq!(world.stall_message(robo), Some("Could not find empty slot on any.".to_string()));
+
 }
 
 #[test]
