@@ -3,14 +3,18 @@
 use bevy::prelude::IVec2;
 use conniver::{val::p_all, p};
 
-use crate::{model::{world::World, auto::{AutoNdx, Auto}, act::Action, kind::Kind}, program::{program::ProgramSpace}};
+use crate::{model::{world::World, auto::{AutoNdx, Auto}, act::Action, kind::Kind, dir::Dir}, program::{program::ProgramSpace}};
+
+fn run1(world: &mut World, program: &mut ProgramSpace, dur: f64) {
+  program.update(dur);
+  program.process_messages(world);
+  world.update(dur);
+}
 
 fn run100(world: &mut World, program: &mut ProgramSpace, robo: AutoNdx, expected_steps: i32) {
   let mut steps = 0;
   while steps < 100 && (!program.idle(robo) || (world.get_auto(robo).action != Action::Stop && !world.get_auto(robo).action_finished)) {
-    program.update(1.0);
-    program.process_messages(world);
-    world.update(1.0);
+    run1(world, program, 1.0);
     assert_eq!(world.stall_message(robo), None);
     steps += 1;
   }
@@ -163,7 +167,8 @@ fn test_load() {
       (traction 1)
     )
     (define-kind robo
-      (traction 1)
+      (traction 5)
+      (program '(loop (move e) (move w)))
     )
     (define earth-auto (create-auto 
       (kind earth)
@@ -198,13 +203,19 @@ fn test_load() {
   assert_eq!(world.get_tile(earth, IVec2::new(0, 0)), world.kinds.get("grass"));
   assert_eq!(world.get_item(earth, IVec2::new(10, 10)), rock);
 
-  let robo = world.kinds.get("robo");
   let robo_auto = AutoNdx(2);
+  run1(&mut world, &mut program, 0.1);
+
+  let robo = world.kinds.get("robo");
   let robo_data = world.get_auto(robo_auto);
   assert_eq!(robo_data.kind, robo);
-  assert_eq!(robo_data.loc, IVec2::new(10, 10));
   assert_eq!(robo_data.parent, earth);
   assert_eq!(program.access, robo_auto);
+
+  // verify that the robo's program is running
+  assert_eq!(robo_data.action, Action::Move(Dir::West));
+  assert_eq!(robo_data.loc, IVec2::new(11, 10));
+
 }
 
 #[test]

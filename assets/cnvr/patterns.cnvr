@@ -1,0 +1,5 @@
+(define-pattern
+  (for autoprocessor)
+  (in (ore nothing))
+  (out (wire nothing))
+)

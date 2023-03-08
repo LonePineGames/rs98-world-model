@@ -1,7 +1,6 @@
 use std::collections::HashMap;
 
 use bevy::prelude::IVec2;
-use conniver::{Val, object::read_string, read_object};
 use conniver::{Val, object::read_string};
 
 use crate::model::{auto::AutoNdx, world::World, act::Action, kind::Kind, dir::Dir, pattern::Pattern};
@@ -114,11 +113,15 @@ pub fn get_message_handlers() -> HashMap<String, MessageHandler> {
   });
 
   handlers.insert("pick".to_string(), |_, _, world, auto| {
-    action_handler(world, auto, Action::Pick(Kind(0), Kind(0)))
+    action_handler(world, auto, Action::Pick(Kind(1), Kind(1)))
   });
 
   handlers.insert("place".to_string(), |_, _, world, auto| {
-    action_handler(world, auto, Action::Place(Kind(0)))
+    action_handler(world, auto, Action::Place(Kind(1)))
+  });
+
+  handlers.insert("produce".to_string(), |_, _, world, auto| {
+    action_handler(world, auto, Action::Produce)
   });
 
   handlers.insert("define-kind".to_string(), |args, _, world, _| {
@@ -146,12 +149,13 @@ pub fn get_message_handlers() -> HashMap<String, MessageHandler> {
     Some(Val::nil())
   });
 
-  handlers.insert("create-auto".to_string(), |args, _, world, _| {
+  handlers.insert("create-auto".to_string(), |args, program, world, _| {
     if args.len() < 1 {
       return Some(Val::String("usage: (create-auto (name x) ...)".to_owned()));
     }
     let args = Val::List(args[1..].to_vec());
     let auto = world.create_auto_from_val(args);
+    program.init_auto(auto, world);
     Some(Val::Num(auto.0 as f32))
   });
 
@@ -181,7 +185,6 @@ fn action_handler(world: &mut World, auto: AutoNdx, generator: Action) -> Option
   if action != generator {
     world.set_auto_action(auto, generator);
   } else if world.get_auto(auto).action_finished {
-    println!("action_handler: finished");
     world.set_auto_action(auto, Action::Stop);
     return Some(Val::nil());
   }

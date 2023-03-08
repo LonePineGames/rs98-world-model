@@ -116,11 +116,13 @@
 (define-kind autoprocessor
   (scene "model/autoprocessor.glb#Scene0")
   (dim 2 1)
+  (program '(loop (produce)))
 )
 
 (define-kind pad
   (scene "model/pad.glb#Scene0")
   (dim 3 3)
+  (program '(loop (produce)))
 )
 
 (define-kind rcarmack

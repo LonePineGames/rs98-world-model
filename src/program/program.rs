@@ -117,7 +117,6 @@ impl ProgramSpace {
       let ndx = AutoNdx(ndx);
       if let Some(message) = state.message_peek() {
         if let Some(Val::Sym(message_name)) = message.get(0) {
-          println!("message: {}", message_name);
           if let Some(handler) = self.message_handlers.get(message_name) {
             messages.push((message, *handler, ndx));
           }
@@ -144,5 +143,12 @@ impl ProgramSpace {
       return true;
     }
     self.procs[robo.0].finished()
+  }
+
+  pub fn init_auto(&mut self, auto: AutoNdx, world: &mut World) {
+    self.ensure_size(auto.0);
+    let kind = world.get_auto(auto).kind;
+    let program = world.kinds.get_data(kind).program.clone();
+    self.procs[auto.0].set_program(program);
   }
 }

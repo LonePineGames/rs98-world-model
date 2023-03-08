@@ -2,7 +2,41 @@
 use bevy::prelude::IVec2;
 use conniver::{p};
 
-use crate::model::{auto::{AutoNdx, Auto}, world::World, act::Action, dir::Dir};
+use crate::model::{auto::{AutoNdx, Auto}, world::World, act::Action, dir::Dir, kind::Kind};
+
+use super::kind::Kinds;
+
+#[test]
+fn test_hiearchy() {
+  let mut world = World::new_test();
+  let space = AutoNdx(0);
+
+  let earth = world.create_auto(Auto {
+    kind: world.kinds.get("earth"),
+    loc: IVec2::new(0, 0),
+    parent: space,
+    dim: IVec2::new(20, 20),
+    ..Auto::default()
+  });
+
+  let robo = world.create_auto(Auto {
+    kind: world.kinds.get("robo"),
+    loc: IVec2::new(10, 10),
+    parent: earth,
+    dim: IVec2::new(1, 1),
+    ..Auto::default()
+  });
+
+  let space_obj = world.get_auto(space);
+  let earth_obj = world.get_auto(earth);
+  let robo_obj = world.get_auto(robo);
+
+  assert_eq!(space_obj.parent, space);
+  assert_eq!(earth_obj.parent, space);
+  assert_eq!(robo_obj.parent, earth);
+  assert_eq!(space_obj.children, vec![earth]);
+  assert_eq!(earth_obj.children, vec![robo]);
+}
 
 #[test]
 fn test_move_impeded() {
@@ -90,7 +124,7 @@ fn test_pick_place() {
 
   world.set_auto_action(robo, Action::Place(world.kinds.nothing()));
   world.update(2.0);
-  assert_eq!(world.stall_message(robo), Some("Location is not empty.".to_string()));
+  assert_eq!(world.stall_message(robo), Some("Could not find empty slot on ground.".to_string()));
 }
 
 #[test]
@@ -132,7 +166,7 @@ fn test_pick_place_machine() {
   world.set_item(machine_ndx, IVec2::new(0, 0), rock);
   world.set_auto_action(robo, Action::Place(machine));
   world.update(2.0);
-  assert_eq!(world.stall_message(robo), Some("Location is not empty.".to_string()));
+  assert_eq!(world.stall_message(robo), Some("Could not find empty slot on machine.".to_string()));
 
   world.set_auto_action(robo, Action::Move(Dir::North));
   world.update(2.0);
@@ -141,8 +175,78 @@ fn test_pick_place_machine() {
 
   world.set_auto_action(robo, Action::Place(machine));
   world.update(2.0);
-  assert_eq!(world.stall_message(robo), Some("Could not find machine.".to_string()));
+  assert_eq!(world.stall_message(robo), Some("Could not find empty slot on machine.".to_string()));
 
+}
+
+#[test]
+fn test_pick_filters() {
+  let mut world = World::new_test();
+  let space = AutoNdx(0);
+  let earth = world.create_auto(Auto {
+    kind: world.kinds.get("earth"),
+    loc: IVec2::new(0, 0),
+    parent: space,
+    dim: IVec2::new(20, 20),
+    ..Auto::default()
+  });
+  world.set_all_tiles(earth, world.kinds.get("grass"));
+
+  let loc = IVec2::new(10, 10);
+  let rock = world.kinds.get("rock");
+  let machine = world.kinds.get("machine");
+  let wildcard = Kind(1);
+  let ground = Kind(0);
+
+  let machine_ndx = world.create_auto(Auto {
+    kind: machine,
+    loc,
+    parent: earth,
+    dim: IVec2::new(1, 1),
+    ..Auto::default()
+  });
+  let robo = world.create_auto(Auto {
+    kind: world.kinds.get("robo"),
+    loc,
+    items: vec![rock],
+    parent: earth,
+    dim: IVec2::new(1, 1),
+    ..Auto::default()
+  });
+
+  // Place into a machine that isn't there
+  world.set_auto_action(robo, Action::Place(rock));
+  world.update(2.0);
+  assert_eq!(world.stall_message(robo), Some("Could not find empty slot on rock.".to_string()));
+
+  // Wildcard place
+  world.set_auto_action(robo, Action::Place(wildcard));
+  world.update(2.0);
+  assert_eq!(world.stall_message(robo), None);
+  assert_eq!(world.get_item(machine_ndx, IVec2::new(0, 0)), rock);
+  assert_eq!(world.get_item(robo, IVec2::new(0, 0)), world.kinds.nothing());
+
+  // Place when not holding anything
+  world.set_auto_action(robo, Action::Place(wildcard));
+  world.update(2.0);
+  assert_eq!(world.stall_message(robo), Some("Cannot place nothing.".to_string()));
+
+  // Pick up nothing
+  world.set_auto_action(robo, Action::Pick(ground, wildcard));
+  world.update(2.0);
+  assert_eq!(world.stall_message(robo), Some("Cannot pick up nothing.".to_string()));
+
+  // Pick up from ground which is empty
+  world.set_auto_action(robo, Action::Pick(wildcard, ground));
+  world.update(2.0);
+  assert_eq!(world.stall_message(robo), Some("Could not find any on ground.".to_string()));
+
+  // Successfully wildcard pick from machine
+  world.set_auto_action(robo, Action::Pick(wildcard, wildcard));
+  world.update(2.0);
+  assert_eq!(world.stall_message(robo), None);
+  assert_eq!(world.get_item(machine_ndx, IVec2::new(0, 0)), world.kinds.nothing());
+  assert_eq!(world.get_item(robo, IVec2::new(0, 0)), rock);
 }
 
 #[test]
@@ -221,47 +325,64 @@ fn test_goto_impeded() {
 fn test_produce() {
   let mut world = World::new_test();
   let space = AutoNdx(0);
-  world.set_all_tiles(space, world.kinds.get("grass"));
+  let earth = world.create_auto(Auto {
+    kind: world.kinds.get("earth"),
+    loc: IVec2::new(0, 0),
+    parent: space,
+    ..Auto::default()
+  });
+  world.set_all_tiles(earth, world.kinds.get("grass"));
+
   let loc = IVec2::new(10, 10);
   let rock = world.kinds.get("rock");
   let machine = world.kinds.get("machine");
   let machine_ndx = world.create_auto(Auto {
     kind: machine,
     loc,
-    parent: space,
+    parent: earth,
     ..Auto::default()
   });
   let robo = world.create_auto(Auto {
     kind: world.kinds.get("robo"),
     loc,
     items: vec![rock],
-    parent: space,
+    parent: earth,
     dim: IVec2::new(1, 1),
     ..Auto::default()
   });
 
+  assert_eq!(world.get_auto(machine_ndx).parent, earth);
+  assert_eq!(world.get_auto(robo).parent, earth);
+  assert_eq!(world.get_auto(earth).parent, space);
+  assert_eq!(world.get_auto(earth).children, vec![machine_ndx, robo]);
+
+  // Robo places rock in machine
   world.set_auto_action(robo, Action::Place(machine));
   world.update(2.0);
   assert_eq!(world.stall_message(robo), None);
   assert_eq!(world.get_item(machine_ndx, IVec2::new(0, 0)), rock);
   assert_eq!(world.get_item(robo, IVec2::new(0, 0)), world.kinds.nothing());
 
+  // Machine produces thing
   world.set_auto_action(machine_ndx, Action::Produce);
   world.update(2.0);
   assert_eq!(world.stall_message(robo), None);
   assert_eq!(world.get_item(machine_ndx, IVec2::new(0, 0)), world.kinds.get("thing"));
 
+  // robo gets free rock, moves to machine's other slot
   world.set_item(robo, IVec2::new(0, 0), rock);
   world.set_auto_action(robo, Action::Move(Dir::East));
   world.update(2.0);
   assert_eq!(world.stall_message(robo), None);
 
+  // put rock in machine
   world.set_auto_action(robo, Action::Place(machine));
   world.update(2.0);
   assert_eq!(world.stall_message(robo), None);
   assert_eq!(world.get_item(machine_ndx, IVec2::new(1, 0)), rock);
   println!("machine holding: {:?}", world.get_items(machine_ndx));
 
+  // machine produces widget
   world.set_auto_action(machine_ndx, Action::Produce);
   world.update(2.0);
   assert_eq!(world.get_item(machine_ndx, IVec2::new(0, 0)), world.kinds.get("widget"));
@@ -382,4 +503,45 @@ fn test_load_kinds() {
 
   let missing = world.kinds.get("robo");
   assert_eq!(missing.0, 1);
+}
+
+#[test]
+fn test_kind_matching() {
+  let nothing = Kind(0);
+  let wildcard = Kind(1);
+  let robo = Kind(2);
+
+  assert!(nothing.matches(nothing));
+  assert!(nothing.matches(wildcard));
+  assert!(!nothing.matches(robo));
+  assert!(wildcard.matches(nothing));
+  assert!(wildcard.matches(wildcard));
+  assert!(wildcard.matches(robo));
+  assert!(!robo.matches(nothing));
+  assert!(robo.matches(wildcard));
+  assert!(robo.matches(robo));
+}
+
+#[test]
+fn test_kind_names() {
+  let kinds = Kinds::new_test();
+  let nothing = kinds.get("nothing");
+  let missingno = kinds.get("missingno");
+  let robo = kinds.get("robo");
+
+  println!("nothing: {:?}", nothing);
+
+  assert_eq!(kinds.name(nothing), "nothing");
+  assert_eq!(kinds.name(missingno), "missingno");
+  assert_eq!(kinds.name(robo), "robo");
+
+  assert_eq!(kinds.action_name(nothing), "ground");
+  assert_eq!(kinds.action_name(missingno), "any");
+  assert_eq!(kinds.action_name(robo), "robo");
+
+  assert_eq!(kinds.name_list(&vec![nothing, missingno, robo]), "nothing missingno robo");
+  assert_eq!(kinds.action_name_list(&vec![nothing, missingno, robo]), "ground any robo");
+
+  assert_eq!(nothing, kinds.get("ground"));
+  assert_eq!(missingno, kinds.get("any"));
 }

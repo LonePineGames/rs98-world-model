@@ -1,4 +1,5 @@
 (load "assets/cnvr/kinds.cnvr")
+(load "assets/cnvr/patterns.cnvr")
 
 (define earth-auto (create-auto
   (kind earth)

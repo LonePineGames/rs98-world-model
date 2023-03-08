@@ -36,7 +36,7 @@ impl World {
       autos: vec![],
     };
     world.create_auto(Auto {
-      kind: world.kinds.get("earth"),
+      kind: world.kinds.get("space"),
       dim: IVec2::new(100, 100),
       ..Auto::default()
     });
@@ -196,16 +196,19 @@ impl World {
 
   pub fn get_slots(&self, parent_ndx: AutoNdx, loc: IVec2) -> Vec<Slot> {
     let mut ndxes = vec![];
-    for (ndx, auto) in self.autos.iter().enumerate() {
+    let children = self.get_auto(parent_ndx).children.clone();
+    for ndx in children {
+      let auto = self.get_auto(ndx);
       if auto.parent != parent_ndx {
+        println!("{} != {}", auto.parent.0, parent_ndx.0);
         continue;
       }
       let dim = auto.dim;
       let kind_name = self.kinds.get_data(auto.kind).name.clone();
-      println!("{} {}: {:?} {:?} {:?}", kind_name, ndx, loc, auto.loc, dim);
+      println!("{} {:?}: {:?} {:?} {:?}", kind_name, ndx, loc, auto.loc, dim);
       let loc = loc - auto.loc;
       if loc.x >= 0 && loc.x < dim.x && loc.y >= 0 && loc.y < dim.y {
-        ndxes.push(Slot(AutoNdx(ndx), loc));
+        ndxes.push(Slot(ndx, loc));
       }
     }
     ndxes
@@ -247,6 +250,47 @@ impl World {
 
   pub fn get_pattern(&self, kind: Kind, holding: &Vec<Kind>) -> Option<Pattern> {
     self.patterns.get(kind, holding)
+  }
+
+  pub fn pick_place_target(&self, auto_ndx: AutoNdx, target_kind: Kind, item_kind: Kind) -> Option<Slot> {
+    let auto = self.get_auto(auto_ndx);
+    let parent_ndx = auto.parent;
+    let loc = auto.loc;
+    let mut result = None;
+    if target_kind == self.kinds.nothing() {
+      result = Some(Slot(parent_ndx, loc));
+    } else {
+      let slots = self.get_slots(parent_ndx, loc);
+      println!("slots: {:?} {:?} {:?}", slots, auto_ndx, parent_ndx);
+      for slot in slots {
+        if slot.0 == auto_ndx {
+          continue;
+        }
+        let auto = self.get_auto(slot.0);
+        println!("slot: {:?} {:?} {:?}", slot, auto.kind, target_kind);
+        if auto.kind.matches(target_kind) {
+          let item_there = self.get_item(slot.0, slot.1);
+          println!("item_there: {:?} {:?} {:?}", item_there, item_there, item_kind);
+          if item_there.matches(item_kind) && (item_there != Kind(0) || item_kind == Kind(0)) {
+            result = Some(slot);
+            break;
+          }
+        }
+      }
+
+      if target_kind == Kind(1) && result.is_none() {
+        result = Some(Slot(parent_ndx, loc));
+      }
+    }
+
+    if let Some(result_slot) = result {
+      let item_there = self.get_item(result_slot.0, result_slot.1);
+      if !item_there.matches(item_kind) || (item_there == Kind(0) && item_kind != Kind(0)) {
+        result = None;
+      }
+    }
+    
+    result
   }
 }
 

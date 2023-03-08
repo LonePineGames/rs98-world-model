@@ -5,12 +5,18 @@ use conniver::{Val, read_object, read_ivec2, object::read_string, p};
 
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Hash)]
 pub struct Kind(pub usize);
+impl Kind {
+  pub fn matches(&self, other: Kind) -> bool {
+    self.0 == other.0 || other.0 == 1 || self.0 == 1
+  }
+}
 
 #[derive(Clone, Debug, Default)]
 pub struct KindData {
   pub name: String,
   pub scene: String,
   pub item_dim: IVec2,
+  pub program: Val,
   pub traction: i32,
 }
 
@@ -36,81 +42,61 @@ impl Kinds {
 
   #[cfg(test)]
   pub fn new_test() -> Kinds {
-    let mut kinds: Vec<KindData> = vec![];
-    kinds.push(KindData { 
-      name: "nothing".to_string(),
-      scene: "".to_string(),
-      item_dim: IVec2::new(0, 0),
-      traction: 10,
-    });
-    kinds.push(KindData { 
-      name: "missingno".to_string(),
-      scene: "".to_string(),
-      item_dim: IVec2::new(0, 0),
-      traction: 1,
-    });
-    kinds.push(KindData { 
-      name: "grass".to_string(),
-      scene: "model/lab-tile.glb#Scene0".to_string(),
-      item_dim: IVec2::new(0, 0),
-      traction: 1,
-    });
-    kinds.push(KindData { 
-      name: "rock".to_string(),
-      scene: "model/baux.glb#Scene0".to_string(),
-      item_dim: IVec2::new(0, 0),
-      traction: 1,
-    });
-    kinds.push(KindData { 
-      name: "robo".to_string(),
-      scene: "model/r1000.glb#Scene0".to_string(),
-      item_dim: IVec2::new(1, 1),
-      traction: 2,
-    });
-    kinds.push(KindData { 
-      name: "machine".to_string(),
-      scene: "".to_string(),
-      item_dim: IVec2::new(2, 1),
-      traction: 1,
-    });
-    kinds.push(KindData { 
-      name: "wall".to_string(),
-      scene: "model/lab-wall.glb#Scene0".to_string(),
-      item_dim: IVec2::new(0, 0),
-      traction: 5,
-    });
-    kinds.push(KindData { 
-      name: "thing".to_string(),
-      scene: "".to_string(),
-      item_dim: IVec2::new(0, 0),
-      traction: 5,
-    });
-    kinds.push(KindData {
-      name: "table".to_string(),
-      scene: "model/table.glb#Scene0".to_string(),
-      item_dim: IVec2::new(2, 1),
-      traction: 5,
-    });
-    kinds.push(KindData {
-      name: "widget".to_string(),
-      scene: "model/widget.glb#Scene0".to_string(),
-      item_dim: IVec2::new(1, 1),
-      traction: 5,
-    });
-    let mut kinds_by_name = HashMap::new();
-    for (i, kind) in kinds.iter().enumerate() {
-      kinds_by_name.insert(kind.name.clone(), Kind(i));
-    }
-    Kinds { kinds, kinds_by_name }
+    let mut kinds = Kinds::new_blank();
+    kinds.set_by_val("earth", p("(
+      (dim 20 20)
+      (traction 1)
+    )"));
+    kinds.set_by_val("grass", p("(
+      (scene \"model/lab-tile.glb#Scene0\")
+      (traction 1)
+    )"));
+    kinds.set_by_val("rock", p("(
+      (scene \"model/baux.glb#Scene0\")
+      (traction 1)
+    )"));
+    kinds.set_by_val("robo", p("(
+      (scene \"model/r1000.glb#Scene0\")
+      (dim (1 1))
+      (traction 2)
+    )"));
+    kinds.set_by_val("machine", p("(
+      (dim (2 1))
+      (traction 1)
+    )"));
+    kinds.set_by_val("wall", p("(
+      (scene \"model/lab-wall.glb#Scene0\")
+      (traction 5)
+    )"));
+    kinds.set_by_val("thing", p("(
+      (traction 5)
+    )"));
+    kinds.set_by_val("table", p("(
+      (scene \"model/table.glb#Scene0\")
+      (dim (2 1))
+      (traction 5)
+    )"));
+    kinds.set_by_val("widget", p("(
+      (scene \"model/widget.glb#Scene0\")
+      (dim (1 1))
+      (traction 5)
+    )"));
+
+    kinds
   }
 
   pub fn get(&self, arg: &str) -> Kind {
-    for (i, kind) in self.kinds.iter().enumerate() {
-      if kind.name == arg {
-        return Kind(i);
+    match arg {
+      "ground" => self.nothing(),
+      "any" => self.missingno(),
+      _ => {
+        if let Some(kind) = self.kinds_by_name.get(arg) {
+          *kind
+        } else {
+          self.missingno()
+        }
       }
     }
-    return self.missingno();
   }
 
   pub fn nothing(&self) -> Kind {
@@ -168,6 +154,8 @@ impl Kinds {
           println!("bad traction: {:?}", val);
         },
 
+        "program" => kind_data.program = val.clone(),
+
         _ => {}
       }
     });
@@ -179,5 +167,33 @@ impl Kinds {
       self.kinds_by_name.remove(&old_name);
       self.kinds_by_name.insert(new_name, kind);
     }
+  }
+
+  pub fn name(&self, kind: Kind) -> String {
+    self.kinds[kind.0].name.clone()
+  }
+
+  pub fn action_name(&self, kind: Kind) -> String { 
+    match kind {
+      Kind(0) => "ground".to_string(),
+      Kind(1) => "any".to_string(),
+      _ => self.name(kind)
+    }
+  }
+
+  pub fn name_list(&self, kinds: &[Kind]) -> String {
+    let mut names = vec![];
+    for kind in kinds {
+      names.push(self.name(*kind));
+    }
+    names.join(" ")
+  }
+
+  pub fn action_name_list(&self, kinds: &[Kind]) -> String {
+    let mut names = vec![];
+    for kind in kinds {
+      names.push(self.action_name(*kind));
+    }
+    names.join(" ")
   }
 }

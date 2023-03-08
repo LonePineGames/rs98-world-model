@@ -44,6 +44,54 @@ impl Action {
       }
 
       Action::Pick(item, source) => {
+        if *item == Kind(0) {
+          return Some("Cannot pick up nothing.".to_string());
+        }
+        let target = world.pick_place_target(auto_ndx, *source, *item);
+        if let Some(Slot(target_auto, target_ndx)) = target {
+          let contents = world.get_item(target_auto, target_ndx);
+          world.set_item(target_auto, target_ndx, world.kinds.nothing());
+          world.set_item(auto_ndx, IVec2::new(0, 0), contents);
+          world.finish_auto_action(auto_ndx);
+          let target_kind = world.get_auto(target_auto).kind;
+          let target_name = if target_auto == world.get_auto(auto_ndx).parent {
+            "ground".to_string()
+          } else {
+            world.kinds.name(target_kind)
+          };
+          println!("Picked up {} from {}.", world.kinds.name(contents), target_name);
+          None
+        } else {
+          Some(format!("Could not find {} on {}.", world.kinds.action_name(*item), world.kinds.action_name(*source)))
+        }
+      }
+
+      Action::Place(dest) => {
+        let holding_kind = world.get_item(auto_ndx, IVec2::new(0, 0));
+        if holding_kind == Kind(0) {
+          return Some("Cannot place nothing.".to_string());
+        }
+        let target = world.pick_place_target(auto_ndx, *dest, Kind(0));
+        if let Some(Slot(target_auto, target_ndx)) = target {
+          let contents = world.get_item(auto_ndx, IVec2::new(0, 0));
+          world.set_item(auto_ndx, IVec2::new(0, 0), Kind(0));
+          world.set_item(target_auto, target_ndx, contents);
+          world.finish_auto_action(auto_ndx);
+          let target_kind = world.get_auto(target_auto).kind;
+          let target_name = if target_auto == world.get_auto(auto_ndx).parent {
+            "ground".to_string()
+          } else {
+            world.kinds.name(target_kind)
+          };
+          println!("Placed {} in {}.", world.kinds.name(contents), target_name);
+          None
+        } else {
+          let dest_name = world.kinds.action_name(*dest);
+          Some(format!("Could not find empty slot on {}.", dest_name))
+        }
+      }
+
+      /*Action::Pick(item, source) => {
         let auto_data = world.get_auto(auto_ndx);
         let loc = auto_data.loc;
         let parent = auto_data.parent;
@@ -63,6 +111,9 @@ impl Action {
           }
         } else {
           for Slot(other_ndx, pick_loc) in world.get_slots(parent, loc) {
+            if other_ndx == auto_ndx {
+              continue;
+            }
             let other = world.get_auto(other_ndx);
             if other.kind == *source {
               let holding = world.get_item(other_ndx, pick_loc);
@@ -79,17 +130,6 @@ impl Action {
           Some(format!("Could not find {} at {}.", source_kind_name, loc))
           
         }
-
-        /*if source != &world.kinds.nothing() {
-          Some(format!("Could not find {:?} in {:?}.", item, source))
-        } else if pick_up != *item {
-          Some(format!("Could not find {:?} in {:?}.", item, source))
-        } else {
-          world.set_item(parent, loc, world.kinds.nothing());
-          world.set_item(auto, IVec2::new(0, 0), *item);
-          world.finish_auto_action(auto);
-          None
-        }*/
       }
 
       Action::Place(dest) => {
@@ -102,8 +142,12 @@ impl Action {
           target = Some(Slot(parent, loc));
         } else {
           for Slot(other_ndx, place_loc) in world.get_slots(parent, loc) {
+            if other_ndx == auto_ndx {
+              continue;
+            }
             let other = world.get_auto(other_ndx);
-            if other.kind == *dest {
+            if other.kind.matches(*dest) {
+              println!("Found {:?} for {:?}", other.kind, dest);
               target = Some(Slot(other_ndx, place_loc));
               break;
             }
@@ -123,12 +167,10 @@ impl Action {
           let dest_name = &world.kinds.get_data(*dest).name;
           return Some(format!("Could not find {}.", dest_name))
         }
-      }
+      }*/
 
       Action::Goto(loc) => {
         let dir = route(world, auto_ndx, *loc);
-        //let dir = Dir::from_ivec2(*loc - auto_loc);
-        println!("dir: {:?}", dir);
         if dir == Dir::None {
           world.finish_auto_action(auto_ndx);
           None
