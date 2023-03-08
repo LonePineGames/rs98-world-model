@@ -11,6 +11,14 @@ impl Kind {
   }
 }
 
+#[derive(Clone, Debug, Default, PartialEq, Eq, Hash)]
+pub enum KindRole {
+  Tile,
+  #[default]
+  Item,
+  Auto,
+}
+
 #[derive(Clone, Debug, Default)]
 pub struct KindData {
   pub name: String,
@@ -18,6 +26,7 @@ pub struct KindData {
   pub item_dim: IVec2,
   pub program: Val,
   pub traction: i32,
+  pub role: KindRole,
 }
 
 pub struct Kinds {
@@ -140,6 +149,15 @@ impl Kinds {
     read_object(&data, |key, val| {
       match key {
         "name" => new_name = Some(read_string(val)), // allows renaming
+        "role" => kind_data.role = match read_string(val).as_str() {
+          "tile" => KindRole::Tile,
+          "item" => KindRole::Item,
+          "auto" => KindRole::Auto,
+          _ => {
+            println!("bad role: {:?}", val);
+            KindRole::Item
+          }
+        },
         "scene" => kind_data.scene = read_string(val),
 
         "dim" => read_ivec2(val, |x, y| {
@@ -181,6 +199,7 @@ impl Kinds {
     }
   }
 
+  #[cfg(test)]
   pub fn name_list(&self, kinds: &[Kind]) -> String {
     let mut names = vec![];
     for kind in kinds {
@@ -189,6 +208,7 @@ impl Kinds {
     names.join(" ")
   }
 
+  #[cfg(test)]
   pub fn action_name_list(&self, kinds: &[Kind]) -> String {
     let mut names = vec![];
     for kind in kinds {

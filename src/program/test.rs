@@ -213,8 +213,17 @@ fn test_load() {
   assert_eq!(program.access, robo_auto);
 
   // verify that the robo's program is running
-  assert_eq!(robo_data.action, Action::Move(Dir::West));
+  assert_eq!(robo_data.loc, IVec2::new(10, 10));
+  assert_eq!(robo_data.action, Action::Stop);
+  run1(&mut world, &mut program, 0.1);
+  let robo_data = world.get_auto(robo_auto);
+  assert_eq!(robo_data.loc, IVec2::new(10, 10));
+  assert_eq!(robo_data.action, Action::Move(Dir::East));
+  run1(&mut world, &mut program, 1.0);
+  run1(&mut world, &mut program, 0.1);
+  let robo_data = world.get_auto(robo_auto);
   assert_eq!(robo_data.loc, IVec2::new(11, 10));
+  assert_eq!(robo_data.action, Action::Stop);
 
 }
 
@@ -293,15 +302,19 @@ fn test_automine() {
       (traction 1)
     )
     (define-kind grass
+      (role tile)
       (traction 1)
     )
     (define-kind earth
+      (role auto)
       (traction 1)
     )
     (define-kind robo
+      (role auto)
       (traction 5)
     )
     (define-kind automine
+      (role auto)
       (dim 1 1)
       (program '(loop (set-item me 0 0 rock)))
     )
@@ -341,7 +354,7 @@ fn test_automine() {
   assert_eq!(world.get_auto(automine_auto).loc, IVec2::new(10, 10));
   assert_eq!(world.get_auto(robo_auto).loc, IVec2::new(10, 10));
 
-  assert_eq!(world.get_item(automine_auto, IVec2::new(0, 0)), nothing);
+  assert_eq!(world.get_item(automine_auto, IVec2::new(0, 0)), rock);
   assert_eq!(world.get_item(robo_auto, IVec2::new(0, 0)), nothing);
 
   world.set_auto_action(robo_auto, Action::Pick(rock, automine));
@@ -352,6 +365,19 @@ fn test_automine() {
   run1(&mut world, &mut program, 1.0);
   run1(&mut world, &mut program, 1.0);
   assert_eq!(world.get_item(automine_auto, IVec2::new(0, 0)), rock);
+
+  // have the robo place another automine, then test it (verify program init)
+  world.set_item(robo_auto, IVec2::new(0, 0), automine);
+  world.get_auto_mut(robo_auto).loc = IVec2::new(20, 20); // holy teleporation batman
+  world.set_auto_action(robo_auto, Action::Place(nothing));
+  run100(&mut world, &mut program, robo_auto, 1);
+  assert_eq!(world.autos.len(), 5);
+  let automine_auto2 = AutoNdx(4);
+  assert_eq!(world.get_auto(automine_auto2).kind, world.kinds.get("automine"));
+  assert_eq!(world.get_auto(automine_auto2).loc, IVec2::new(20, 20));
+  run1(&mut world, &mut program, 1.0);
+  run1(&mut world, &mut program, 1.0);
+  assert_eq!(world.get_item(automine_auto2, IVec2::new(0, 0)), rock);
 }
 
 // #[test]

@@ -2,7 +2,7 @@
 use bevy::prelude::IVec2;
 use conniver::{p};
 
-use crate::model::{auto::{AutoNdx, Auto}, world::World, act::Action, dir::Dir, kind::Kind};
+use crate::model::{auto::{AutoNdx, Auto}, world::World, act::Action, dir::Dir, kind::{Kind, KindRole}};
 
 use super::kind::Kinds;
 
@@ -458,6 +458,7 @@ fn test_load_kinds() {
   )"));
 
   world.kinds.set_by_val("robo", p("(
+    (role auto)
     (traction 0)
     (dim 1 1)
     (scene \"model/r1000.glb#Scene0\")
@@ -480,6 +481,7 @@ fn test_load_kinds() {
   assert_eq!(robo_data.traction, 0);
   assert_eq!(robo_data.item_dim, IVec2::new(1, 1));
   assert_eq!(robo_data.scene, "model/r1000.glb#Scene0");
+  assert_eq!(robo_data.role, KindRole::Auto);
   
   let robot = world.create_auto(Auto {
     kind: robo,
@@ -515,6 +517,50 @@ fn test_load_kinds() {
 
   let missing = world.kinds.get("robo");
   assert_eq!(missing.0, 1);
+}
+
+#[test]
+fn test_place_auto() {
+  let mut world = World::new_test();
+  world.kinds.set_by_val("robo", p("(
+    (role auto)
+    (traction 0)
+    (dim 1 1)
+    (scene \"model/r1000.glb#Scene0\")
+  )"));
+  let space = AutoNdx(0);
+  let earth = world.create_auto(Auto {
+    kind: world.kinds.get("earth"),
+    loc: IVec2::new(0, 0),
+    parent: space,
+    dim: IVec2::new(10, 10),
+    ..Auto::default()
+  });
+
+  let loc = IVec2::new(5, 5);
+  let robo = world.kinds.get("robo");
+  let nothing = world.kinds.get("nothing");
+  let holder = world.create_auto(Auto {
+    kind: robo,
+    loc,
+    parent: earth,
+    ..Auto::default()
+  });
+
+  world.set_item(holder, IVec2::new(0, 0), world.kinds.get("robo"));
+  assert_eq!(world.autos.len(), 3);
+
+  world.set_auto_action(holder, Action::Place(nothing));
+  world.update(2.0);
+  assert_eq!(world.stall_message(holder), None);
+  assert_eq!(world.get_item(holder, IVec2::new(0, 0)), nothing);
+  assert_eq!(world.get_item(earth, loc), nothing);
+  assert_eq!(world.autos.len(), 4);
+  let new_auto = world.autos.last().unwrap();
+  assert_eq!(new_auto.kind, robo);
+  assert_eq!(new_auto.loc, loc);
+  assert_eq!(new_auto.parent, earth);
+  assert_eq!(new_auto.dim, IVec2::new(1, 1));
 }
 
 #[test]

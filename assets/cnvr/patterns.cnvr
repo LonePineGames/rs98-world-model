@@ -25,3 +25,13 @@
         nothing motor   nothing
         nothing nothing nothing))
 )
+
+(define-pattern
+  (for pad)
+  (in  (nothing nothing nothing
+        nothing motor   nothing
+        nothing nothing nothing))
+  (out (nothing nothing nothing
+        nothing autoprocessor   nothing
+        nothing nothing nothing))
+)

@@ -11,8 +11,15 @@
 )
 
 (define-kind lab-tile
+  (role tile)
   (scene "model/lab-tile.glb#Scene0")
   (traction 1)
+)
+
+(define-kind lab-wall
+  (role tile)
+  (scene "model/lab-wall.glb#Scene0")
+  (traction 5)
 )
 
 (define-kind bauxite
@@ -98,52 +105,55 @@
 (define-kind wheel (scene "model/wheel.glb#Scene0"))
 
 (define-kind r1000
+  (role auto)
   (scene "model/r1000.glb#Scene0")
   (dim 1 1)
   (traction 2)
 )
 
-(define-kind lab-wall
-  (scene "model/lab-wall.glb#Scene0")
-  (traction 5)
-)
-
 (define-kind table
+  (role auto)
   (scene "model/table.glb#Scene0")
   (dim 2 1)
 )
 
 (define-kind autoprocessor
+  (role auto)
   (scene "model/autoprocessor.glb#Scene0")
   (dim 2 1)
   (program '(loop (produce)))
 )
 
 (define-kind pad
+  (role auto)
   (scene "model/pad.glb#Scene0")
   (dim 3 3)
   (program '(loop (produce)))
 )
 
 (define-kind automine-ore
+  (role auto)
   (scene "model/automine.glb#Scene0")
   (dim 1 1)
   (program '(loop (create ore)))
 )
 
 (define-kind automine-bauxite
+  (role auto)
   (scene "model/automine.glb#Scene0")
   (dim 1 1)
   (program '(loop (create bauxite)))
 )
 
 (define-kind automine-quartz
+  (role auto)
   (scene "model/automine.glb#Scene0")
   (dim 1 1)
   (program '(loop (create quartz)))
 )
 
 (define-kind automine-fluorite
+  (role auto)
   (scene "model/automine.glb#Scene0")
   (dim 1 1)
   (program '(loop (create fluorite)))

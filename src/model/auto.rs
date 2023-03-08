@@ -31,6 +31,7 @@ impl Auto {
     }
   }
 
+  #[cfg(test)]
   pub fn has_item(&self, loc: IVec2) -> bool {
     let ndx = self.get_ndx(loc);
     if ndx >= 0 && ndx < self.items.len() as i32 {

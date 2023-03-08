@@ -1,6 +1,6 @@
 use bevy::prelude::IVec2;
 
-use crate::model::{kind::Kind, world::World, auto::AutoNdx, dir::Dir, route::route, slot::Slot};
+use crate::model::{kind::{Kind, KindRole}, world::World, auto::{AutoNdx, Auto}, dir::Dir, route::route, slot::Slot};
 
 #[allow(dead_code)]
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Hash)]
@@ -71,9 +71,22 @@ impl Action {
         }
         let target = world.pick_place_target(auto_ndx, *dest, Kind(0));
         if let Some(Slot(target_auto, target_ndx)) = target {
-          let contents = world.get_item(auto_ndx, IVec2::new(0, 0));
-          world.set_item(auto_ndx, IVec2::new(0, 0), Kind(0));
-          world.set_item(target_auto, target_ndx, contents);
+
+          // if we're placing an auto on the ground, create it; otherwise, just place the item
+          let is_auto = world.kinds.get_data(holding_kind).role == KindRole::Auto;
+          if is_auto && target_auto == world.get_auto(auto_ndx).parent {
+            world.set_item(auto_ndx, IVec2::new(0, 0), Kind(0));
+            world.create_auto(Auto {
+              kind: holding_kind,
+              loc: target_ndx,
+              parent: target_auto,
+              ..Default::default()
+            });
+          } else {
+            world.set_item(auto_ndx, IVec2::new(0, 0), Kind(0));
+            world.set_item(target_auto, target_ndx, holding_kind);
+          }
+
           world.finish_auto_action(auto_ndx);
           let target_kind = world.get_auto(target_auto).kind;
           let target_name = if target_auto == world.get_auto(auto_ndx).parent {
@@ -81,8 +94,9 @@ impl Action {
           } else {
             world.kinds.name(target_kind)
           };
-          println!("Placed {} in {}.", world.kinds.name(contents), target_name);
+          println!("Placed {} on {}.", world.kinds.name(holding_kind), target_name);
           None
+
         } else {
           let dest_name = world.kinds.action_name(*dest);
           Some(format!("Could not find empty slot on {}.", dest_name))

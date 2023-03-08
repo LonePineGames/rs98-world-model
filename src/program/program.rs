@@ -112,6 +112,8 @@ impl ProgramSpace {
   }
 
   pub fn process_messages(&mut self, world: &mut World) {
+    self.ensure_size(world.autos.len() - 1);
+
     let mut messages = vec![];
     for (ndx, state) in self.procs.iter_mut().enumerate() {
       let ndx = AutoNdx(ndx);
@@ -120,6 +122,12 @@ impl ProgramSpace {
           if let Some(handler) = self.message_handlers.get(message_name) {
             messages.push((message, *handler, ndx));
           }
+        }
+      } else if state.finished() {
+        let kind = world.get_auto(ndx).kind;
+        let program = world.kinds.get_data(kind).program.clone();
+        if !program.is_nil() {
+          state.set_program(program);
         }
       }
     }
