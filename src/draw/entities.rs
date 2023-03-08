@@ -16,6 +16,11 @@ pub struct Physics {
   pub vel: Vec3,
 }
 
+#[derive(Component)]
+pub struct EntityKind {
+  pub kind: Kind,
+}
+
 pub fn update_entity(
   tracker: TrackedEntity,
   loc: Vec3,
@@ -24,7 +29,7 @@ pub fn update_entity(
   world: &Res<World>,
   entities: &mut ResMut<Entities>,
   ass: &Res<AssetServer>,
-  q: &mut Query<(&mut Transform, &mut Physics), With<TrackedEntity>>,
+  q: &mut Query<(&EntityKind, &mut Transform, &mut Physics), With<TrackedEntity>>,
   time: &Res<Time>,
 ) {
   let entity = entities.get(tracker);
@@ -40,8 +45,16 @@ pub fn update_entity(
     if kind == Kind(0) {
       commands.entity(entity).despawn_recursive();
       entities.entities_map.remove(&tracker);
+      return;
 
-    } else if let Ok((mut transform, mut physics)) = q.get_mut(entity) {
+    } else if let Ok((old_kind, mut transform, mut physics)) = q.get_mut(entity) {
+
+      if old_kind.kind != kind {
+        // kill it and it'll respawn next frame with the right kind
+        commands.entity(entity).despawn_recursive();
+        entities.entities_map.remove(&tracker);
+        return;
+      }
 
       if let TrackedEntity::Auto(_) = tracker {
         let diff = loc - transform.translation;
@@ -94,7 +107,10 @@ pub fn update_entity(
       tracker,
       Physics {
         vel: Vec3::ZERO,
-      }
+      },
+      EntityKind {
+        kind,
+      },
     )).id();
 
     if let Some(parent_entity) = parent_entity {
@@ -117,7 +133,7 @@ pub fn update_entities(
   program: Res<ProgramSpace>,
   mut entities: ResMut<Entities>,
   ass: Res<AssetServer>,
-  mut q: Query<(&mut Transform, &mut Physics), With<TrackedEntity>>,
+  mut q: Query<(&EntityKind, &mut Transform, &mut Physics), With<TrackedEntity>>,
   time: Res<Time>,
 ) {
 
