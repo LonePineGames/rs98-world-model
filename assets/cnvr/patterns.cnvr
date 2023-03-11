@@ -17,6 +17,58 @@
 )
 
 (define-pattern
+  (for autoprocessor)
+  (in (fuel water))
+  (out (plastic nothing))
+)
+
+(define-pattern
+  (for autoprocessor)
+  (in (plastic water))
+  (out (fuel nothing))
+)
+
+(define-pattern
+  (for autoprocessor)
+  (in (quartz water))
+  (out (wafer0 nothing))
+)
+
+(define-pattern
+  (for autoprocessor)
+  (in (fluorite fuel))
+  (out (hypoxic water))
+)
+
+(define-pattern
+  (for autoprocessor)
+  (in (wafer0 water))
+  (out (wafer1 nothing))
+)
+
+(define-pattern
+  (for autoprocessor)
+  (in (wafer1 hypoxic))
+  (out (wafer2 hypoxic))
+)
+
+(define-pattern
+  (for autoprocessor)
+  (in (wafer2 water))
+  (out (wafer3 nothing))
+)
+
+(define-pattern
+  (for pad)
+  (in  (nothing plastic nothing
+        nothing wafer3  nothing
+        nothing wire    nothing))
+  (out (chip    chip    chip
+        chip    chip    chip
+        chip    chip    chip))
+)
+
+(define-pattern
   (for pad)
   (in  (wire    wire    nothing
         wire    ingot   nothing
@@ -28,10 +80,90 @@
 
 (define-pattern
   (for pad)
-  (in  (nothing nothing nothing
-        nothing motor   nothing
+  (in  (nothing ingot   nothing
+        nothing hypoxic nothing
+        nothing wire    nothing))
+  (out (nothing nothing nothing
+        nothing battery nothing
+        nothing nothing nothing))
+)
+
+(define-pattern
+  (for pad)
+  (in  (ingot   ingot   plastic
+        chip    motor   nothing
         nothing nothing nothing))
   (out (nothing nothing nothing
-        nothing autoprocessor   nothing
+        nothing arm     nothing
+        nothing nothing nothing))
+)
+
+(define-pattern
+  (for pad)
+  (in  (nothing nothing nothing
+        arm     arm     arm
+        ingot   ingot   controller))
+  (out (nothing nothing nothing
+        nothing pad     nothing
+        nothing nothing nothing))
+)
+
+(define-pattern
+  (for pad)
+  (in  (nothing ingot   nothing
+        ingot   nothing ingot
+        nothing ingot   nothing))
+  (out (nothing nothing nothing
+        nothing tank    nothing
+        nothing nothing nothing))
+)
+
+(define-pattern
+  (for pad)
+  (in  (nothing nothing nothing
+        wire    tank    controller
+        ingot   ingot   ingot))
+  (out (nothing nothing nothing
+        nothing nothing autoprocessor
+        nothing nothing nothing))
+)
+
+(define-pattern
+  (for pad)
+  (in  (nothing ingot   nothing
+        nothing motor   nothing
+        nothing plastic nothing))
+  (out (nothing nothing nothing
+        nothing nothing nothing
+        nothing wheel   nothing))
+)
+
+(define-pattern
+  (for pad)
+  (in  (nothing nothing nothing
+        chip    chip    chip
+        plastic wire    ingot))
+  (out (nothing nothing nothing
+        nothing controller nothing
+        nothing nothing nothing))
+)
+
+(define-pattern
+  (for pad)
+  (in  (nothing chip    chip
+        arm  controller battery
+        ingot   wheel   wheel))
+  (out (nothing nothing nothing
+        nothing r1000   nothing
+        nothing nothing nothing))
+)
+
+'(define-pattern
+  (for pad)
+  (in  (nothing nothing nothing
+        nothing nothing nothing
+        nothing nothing nothing))
+  (out (nothing nothing nothing
+        nothing nothing nothing
         nothing nothing nothing))
 )

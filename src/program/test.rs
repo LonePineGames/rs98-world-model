@@ -349,7 +349,7 @@ fn test_automine() {
   let rock = world.kinds.get("rock");
   let nothing = world.kinds.get("nothing");
 
-  assert_eq!(world.get_auto(automine_auto).kind, world.kinds.get("automine"));
+  assert_eq!(world.get_auto(automine_auto).kind, automine);
   assert_eq!(world.get_auto(robo_auto).kind, world.kinds.get("robo"));
   assert_eq!(world.get_auto(automine_auto).loc, IVec2::new(10, 10));
   assert_eq!(world.get_auto(robo_auto).loc, IVec2::new(10, 10));

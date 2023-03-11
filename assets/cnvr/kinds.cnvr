@@ -102,6 +102,10 @@
   (scene "model/motor.glb#Scene0")
 )
 
+(define-kind tank
+  (scene "model/tank.glb#Scene0")
+)
+
 (define-kind wheel (scene "model/wheel.glb#Scene0"))
 
 (define-kind r1000
