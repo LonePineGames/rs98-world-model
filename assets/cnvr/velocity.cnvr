@@ -19,4 +19,12 @@
 
 (define (create x) (set-item me 0 0 x))
 
+(define move (lambda (route)
+  (step (string-head route))
+  (define rest (string-tail route))
+  (if (not (string-empty? rest))
+    (move rest)
+  )
+))
+
 (load "assets/cnvr/user.cnvr")

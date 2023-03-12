@@ -45,6 +45,16 @@ impl Dir {
     }
   }
 
+  pub fn to_str(self) -> &'static str {
+    match self {
+      Dir::North => "n",
+      Dir::East => "e",
+      Dir::South => "s",
+      Dir::West => "w",
+      Dir::None => "x",
+    }
+  }
+
   pub fn all() -> Vec<Dir> {
     vec![Dir::North, Dir::East, Dir::South, Dir::West]
   }

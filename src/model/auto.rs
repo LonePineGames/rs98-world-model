@@ -1,4 +1,3 @@
-#![allow(non_upper_case_globals)] 
 #![allow(non_upper_case_globals)] // no way! who wants the code to scream at them? not me.
 
 use bevy::prelude::IVec2;

@@ -9,7 +9,7 @@ use super::auto::auto_alive;
 pub enum Action {
   #[default]
   Stop,
-  Move(Dir),
+  Step(Dir),
   Pick(Kind, Kind),
   Place(Kind),
   Goto(IVec2),
@@ -25,7 +25,7 @@ impl Action {
         None
       }
 
-      Action::Move(dir) => {
+      Action::Step(dir) => {
         let auto = world.get_auto(auto_ndx);
         let new_loc = auto.loc + dir.to_ivec2();
         let parent = auto.parent;
@@ -189,15 +189,20 @@ impl Action {
       }*/
 
       Action::Goto(loc) => {
-        let dir = route(world, auto_ndx, *loc);
-        if dir == Dir::None {
-          world.finish_auto_action(auto_ndx);
-          None
+        let rte = route(world, auto_ndx, *loc);
+        if let Some(rte) = rte {
+          if rte.is_empty() {
+            world.finish_auto_action(auto_ndx);
+            None
+          } else {
+            let dir = rte[0];
+            let auto = world.get_auto_mut(auto_ndx);
+            let new_loc = auto.loc + dir.to_ivec2();
+            auto.loc = new_loc;
+            None
+          }
         } else {
-          let auto = world.get_auto_mut(auto_ndx);
-          let new_loc = auto.loc + dir.to_ivec2();
-          auto.loc = new_loc;
-          None
+          Some(format!("Could not find route to {}.", loc))
         }
       }
 

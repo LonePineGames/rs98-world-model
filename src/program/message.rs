@@ -3,10 +3,9 @@ use std::collections::HashMap;
 use bevy::prelude::IVec2;
 use conniver::{Val, object::read_string};
 
-use crate::model::{auto::{AutoNdx, auto_action_finished}, world::World, act::Action, kind::Kind, dir::Dir, pattern::Pattern};
+use crate::model::{auto::{AutoNdx, auto_action_finished}, world::World, act::Action, kind::Kind, dir::Dir, pattern::Pattern, route::route};
 
 use super::program::ProgramSpace;
-
 
 pub type MessageHandler = fn(Vec<Val>, &mut ProgramSpace, &mut World, AutoNdx) -> Option<Val>;
 
@@ -72,16 +71,13 @@ pub fn get_message_handlers() -> HashMap<String, MessageHandler> {
     Some(Val::nil())
   });
 
-  handlers.insert("move".to_string(), |args, _, world, auto| {
+  handlers.insert("step".to_string(), |args, _, world, auto| {
     if args.len() < 2 {
-      return Some(Val::String("usage: (move auto dir)".to_owned()));
+      return Some(Val::String("usage: (step dir)".to_owned()));
     }
-    let dir = if let Val::Sym(dir) = &args[1] {
-      Dir::from_str(dir)
-    } else {
-      return Some(Val::String("usage: (move auto dir)".to_owned()));
-    };
-    action_handler(world, auto, Action::Move(dir))
+    let dir = read_string(&args[1]);
+    let dir = Dir::from_str(&dir);
+    action_handler(world, auto, Action::Step(dir))
   });
 
   handlers.insert("goto".to_string(), |args, _, world, auto| {
@@ -101,6 +97,32 @@ pub fn get_message_handlers() -> HashMap<String, MessageHandler> {
     let pos = IVec2::new(x, y);
 
     action_handler(world, auto, Action::Goto(pos))
+  });
+
+  handlers.insert("route".to_string(), |args, _, world, auto| {
+    if args.len() < 3 {
+      return Some(Val::String("usage: (route auto x y)".to_owned()));
+    }
+    let x = if let Val::Num(x) = args[1] {
+      x as i32
+    } else {
+      return Some(Val::String("usage: (route auto x y)".to_owned()));
+    };
+    let y = if let Val::Num(y) = args[2] {
+      y as i32
+    } else {
+      return Some(Val::String("usage: (route auto x y)".to_owned()));
+    };
+    let dest = IVec2::new(x, y);
+
+    let route_found = route(world, auto, dest);
+    if let Some(route_found) = route_found {
+      let route_found = route_found.iter().map(|dir| dir.to_str().to_string()).collect::<Vec<String>>().join("");
+      println!("route found: {}", route_found);
+      Some(Val::String(route_found.to_string()))
+    } else {
+      Some(Val::String("no route".to_owned()))
+    }
   });
 
   handlers.insert("stop".to_string(), |_, _, world, auto| {

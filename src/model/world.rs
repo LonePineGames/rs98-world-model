@@ -48,15 +48,10 @@ impl World {
     world
   }
 
-  /*#[cfg(test)]
+  #[cfg(test)]
   pub fn new_lab() -> World {
-    let kinds = Kinds::new_test();
     let dim = IVec2::new(50, 50);
-    let mut world = World {
-      patterns: Patterns::new_test(&kinds),
-      kinds,
-      autos: vec![],
-    };
+    let mut world = World::new_test();
     world.create_auto(Auto {
       kind: world.kinds.get("earth"),
       dim,
@@ -98,7 +93,7 @@ impl World {
     world.set_item(earth, IVec2::new(3, 2), world.kinds.get("rock"));
 
     world
-  }*/
+  }
 
   pub fn create_auto(&mut self, new: Auto) -> AutoNdx {
     let new = new.initalize(&self.kinds);

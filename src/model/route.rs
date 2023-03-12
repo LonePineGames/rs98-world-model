@@ -2,7 +2,7 @@ use std::{collections::{BinaryHeap, HashMap}, cmp::Ordering};
 
 use bevy::prelude::IVec2;
 
-use crate::model::{world::World, dir::Dir, auto::AutoNdx};
+use crate::model::{world::World, dir::Dir, auto::{AutoNdx}};
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
 struct RouteNode {
@@ -28,11 +28,13 @@ impl PartialOrd for RouteNode {
   }
 }
 
-pub fn route(world: &World, auto: AutoNdx, dest: IVec2) -> Dir {
-  let auto = world.get_auto(auto);
+pub fn route(world: &World, auto_ndx: AutoNdx, dest: IVec2) -> Option<Vec<Dir>> {
+  let auto = world.get_auto(auto_ndx);
   let start = auto.loc;
   let kind = auto.kind;
   let parent = auto.parent;
+
+  if start == dest { return Some(Vec::new()); }
 
   let mut heap = BinaryHeap::new();
   let mut dist = HashMap::<IVec2, usize>::new();
@@ -72,10 +74,33 @@ pub fn route(world: &World, auto: AutoNdx, dest: IVec2) -> Dir {
     }
   }
 
-  let dir = prev.get(&start).copied();
-  if let Some(dir) = dir {
-    dir.invert()
-  } else {
-    Dir::None
+  let mut result = Vec::new();
+  let mut pos = start;
+  while let Some(dir) = prev.get(&pos) {
+    let dir = dir.invert();
+    result.push(dir);
+    pos += dir.to_ivec2();
   }
+  println!("route: {:?} -> {:?} = {:?}", start, dest, result);
+
+  if result.is_empty() { return None; }
+  assert!(route_valid(world, auto_ndx, &result, dest));
+  Some(result)
+}
+
+fn route_valid(world: &World, auto: AutoNdx, route: &[Dir], dest: IVec2) -> bool {
+  let auto = world.get_auto(auto);
+  let parent = auto.parent;
+  let kind = auto.kind;
+  let mut pos = auto.loc;
+  for dir in route {
+    pos += dir.to_ivec2();
+    if !world.traction_valid(parent, kind, pos) {
+      println!("route_valid: {:?} -> {:?} = {:?} failed at {:?}", auto.loc, dest, route, pos);
+      return false;
+    }
+    println!("route_valid: {:?} -> {:?} = {:?} passed at {:?}", auto.loc, dest, route, pos);
+  }
+  println!("route_valid: {:?} -> {:?} = {:?} succeeded", auto.loc, dest, route);
+  pos == dest
 }

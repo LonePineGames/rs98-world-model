@@ -52,7 +52,7 @@ fn test_move_impeded() {
     dim: IVec2::new(1, 1),
     ..Auto::default()
   });
-  world.set_auto_action(robo, Action::Move(Dir::North));
+  world.set_auto_action(robo, Action::Step(Dir::North));
   world.update(2.0);
   assert_eq!(world.stall_message(robo), Some("Could not move to (10,11): robo cannot cross wall.".to_string()));
 }
@@ -98,7 +98,7 @@ fn test_pick_place() {
   assert_eq!(world.get_item(space, loc), rock);
   assert_eq!(world.get_item(robo, IVec2::new(0, 0)), world.kinds.nothing());
 
-  world.set_auto_action(robo, Action::Move(Dir::North));
+  world.set_auto_action(robo, Action::Step(Dir::North));
   world.update(2.0);
   assert_eq!(world.stall_message(robo), None);
 
@@ -115,7 +115,7 @@ fn test_pick_place() {
   assert_eq!(world.get_item(space, new_loc), world.kinds.nothing());
   assert_eq!(world.get_item(robo, IVec2::new(0, 0)), rock);
 
-  world.set_auto_action(robo, Action::Move(Dir::South));
+  world.set_auto_action(robo, Action::Step(Dir::South));
   world.update(2.0);
   assert_eq!(world.stall_message(robo), None);
   assert_eq!(world.get_auto(robo).loc, loc);
@@ -168,7 +168,7 @@ fn test_pick_place_machine() {
   world.update(2.0);
   assert_eq!(world.stall_message(robo), Some("Could not find empty slot on machine.".to_string()));
 
-  world.set_auto_action(robo, Action::Move(Dir::North));
+  world.set_auto_action(robo, Action::Step(Dir::North));
   world.update(2.0);
   assert_eq!(world.stall_message(robo), None);
   assert_eq!(world.get_auto(robo).loc, IVec2::new(10, 11));
@@ -383,7 +383,7 @@ fn test_produce() {
 
   // robo gets free rock, moves to machine's other slot
   world.set_item(robo, IVec2::new(0, 0), rock);
-  world.set_auto_action(robo, Action::Move(Dir::East));
+  world.set_auto_action(robo, Action::Step(Dir::East));
   world.update(2.0);
   assert_eq!(world.stall_message(robo), None);
 

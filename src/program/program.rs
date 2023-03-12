@@ -159,4 +159,11 @@ impl ProgramSpace {
     let program = world.kinds.get_data(kind).program.clone();
     self.procs[auto.0].set_program(program);
   }
+
+  pub fn get_var(&self, robo: AutoNdx, name: &String) -> Val {
+    if self.procs.len() <= robo.0 {
+      return Val::nil();
+    }
+    self.procs[robo.0].get_var(name).cloned().unwrap_or_default()
+  }
 }

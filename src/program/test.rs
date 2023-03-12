@@ -24,7 +24,7 @@ pub fn run100(world: &mut World, program: &mut ProgramSpace, robo: AutoNdx, expe
 }
 
 #[test]
-fn test_program_move() {
+fn test_program_goto() {
   let mut world = World::new_test();
   let space = AutoNdx(0);
   let start = IVec2::new(10, 10);
@@ -49,6 +49,42 @@ fn test_program_move() {
 }
 
 #[test]
+fn test_multimove() {
+  let mut world = World::new_test();
+  let space = AutoNdx(0);
+  let start = IVec2::new(10, 10);
+  let end = IVec2::new(13, 14);
+
+  world.set_all_tiles(space, world.kinds.get("grass"));
+
+  let robo = world.create_auto(Auto {
+    kind: world.kinds.get("robo"),
+    loc: start,
+    parent: space,
+    dim: IVec2::new(1, 1),
+    ..Auto::default()
+  });
+
+  let mut program = ProgramSpace::new(robo);
+
+  program.set_program(robo, p("(move nnnneee)"));
+  run100(&mut world, &mut program, robo, 15);
+  assert_eq!(world.get_auto(robo).loc, end);
+  assert_eq!(world.get_auto(robo).action, Action::Stop);
+}
+
+#[test]
+fn test_program_route() {
+  let mut world = World::new_lab();
+  let mut program = ProgramSpace::new(AutoNdx(0));
+
+  let robo = AutoNdx(2);
+  program.set_program(robo, p("(define my-route (route 1 21))"));
+  run100(&mut world, &mut program, robo, -1);
+  assert_eq!(program.get_var(robo, &"my-route".to_string()), p("\"eeeeeeeeeeeeeeeeeeennnnnnnnnnnnnnnnnnnnwwwwwwwwwwwwwwwwwwww\""));
+}
+
+#[test]
 fn test_input() {
   let mut world = World::new_test();
   let space = AutoNdx(0);
@@ -69,10 +105,10 @@ fn test_input() {
   let mut program = ProgramSpace::new_lib_override(robo, &p_all("
     (define (input-key char)
       (cond 
-        ((= char 'A) (set-program '(move w)))
-        ((= char 'D) (set-program '(move e)))
-        ((= char 'W) (set-program '(move n)))
-        ((= char 'S) (set-program '(move s)))
+        ((= char 'A) (set-program '(step w)))
+        ((= char 'D) (set-program '(step e)))
+        ((= char 'W) (set-program '(step n)))
+        ((= char 'S) (set-program '(step s)))
         ((= char 'E) (if (= \"nothing\" (item-at me 0 0)) 
           (set-program '(pick))
           (set-program '(place))
@@ -218,7 +254,7 @@ fn test_load() {
   run1(&mut world, &mut program, 0.1);
   let robo_data = world.get_auto(robo_auto);
   assert_eq!(robo_data.loc, IVec2::new(10, 10));
-  assert_eq!(robo_data.action, Action::Move(Dir::East));
+  assert_eq!(robo_data.action, Action::Step(Dir::East));
   run1(&mut world, &mut program, 1.0);
   run1(&mut world, &mut program, 0.1);
   let robo_data = world.get_auto(robo_auto);
