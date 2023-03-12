@@ -3,13 +3,14 @@ use conniver::{read_object, read_ivec2, object::read_string, Val};
 
 use crate::model::{kind::Kind, act::Action};
 
-use super::kind::Kinds;
+use super::{kind::Kinds, force::ForceNdx, world::World};
 
 #[derive(Clone, Default)]
 pub struct Auto {
   pub kind: Kind,
   pub parent: AutoNdx,
   pub children: Vec<AutoNdx>,
+  pub force: ForceNdx,
   pub items: Vec<Kind>,
   pub tiles: Vec<Kind>,
   pub dim: IVec2,
@@ -69,18 +70,19 @@ impl Auto {
     new
   }
 
-  pub fn from_val(val: Val, kinds: &Kinds) -> Auto {
+  pub fn from_val(val: Val, world: &World) -> Auto {
     let mut auto = Auto::default();
     let mut tile_kind = Kind(0);
     read_object(&val, |key, val| {
       match key {
-        "kind" => auto.kind = kinds.get(&read_string(val)),
+        "kind" => auto.kind = world.kinds.get(&read_string(val)),
         "parent" => if let Val::Num(i) = val {
           auto.parent = AutoNdx(*i as usize);
         } else {
           println!("bad parent: {val:?}");
         },
-        "tile" => tile_kind = kinds.get(&read_string(val)),
+        "force" => auto.force = world.forces.get(&read_string(val)),
+        "tile" => tile_kind = world.kinds.get(&read_string(val)),
         "dim" => read_ivec2(val, |x, y| {
           auto.dim = IVec2::new(x, y);
         }, || {
@@ -94,7 +96,7 @@ impl Auto {
         _ => println!("bad auto key: {key}")
       }
     });
-    auto.initalize(kinds);
+    auto.initalize(&world.kinds);
     if tile_kind.0 != 0 {
       auto.tiles = vec![tile_kind; (auto.dim.x * auto.dim.y) as usize];
     }

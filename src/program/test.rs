@@ -5,13 +5,13 @@ use conniver::{val::p_all, p};
 
 use crate::{model::{world::World, auto::{AutoNdx, Auto}, act::Action, kind::Kind, dir::Dir}, program::{program::ProgramSpace}};
 
-fn run1(world: &mut World, program: &mut ProgramSpace, dur: f64) {
+pub fn run1(world: &mut World, program: &mut ProgramSpace, dur: f64) {
   program.update(dur);
   program.process_messages(world);
   world.update(dur);
 }
 
-fn run100(world: &mut World, program: &mut ProgramSpace, robo: AutoNdx, expected_steps: i32) {
+pub fn run100(world: &mut World, program: &mut ProgramSpace, robo: AutoNdx, expected_steps: i32) {
   let mut steps = 0;
   while steps < 100 && (!program.idle(robo) || (world.get_auto(robo).action != Action::Stop && !world.get_auto(robo).action_finished)) {
     run1(world, program, 1.0);

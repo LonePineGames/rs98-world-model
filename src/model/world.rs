@@ -4,11 +4,14 @@ use conniver::Val;
 
 use crate::model::{auto::{Auto, AutoNdx}, kind::{Kind, Kinds}, act::Action, pattern::{Pattern, Patterns}, slot::Slot};
 
+use super::force::Forces;
+
 #[derive(Resource)]
 pub struct World {
   pub autos: Vec<Auto>,
   pub kinds: Kinds,
   pub patterns: Patterns,
+  pub forces: Forces,
 }
 
 impl World {
@@ -18,6 +21,7 @@ impl World {
       patterns: Patterns::new_blank(),
       kinds,
       autos: vec![],
+      forces: Forces::new_blank(),
     };
     world.create_auto(Auto {
       kind: world.kinds.get("space"),
@@ -34,6 +38,7 @@ impl World {
       patterns: Patterns::new_test(&kinds),
       kinds,
       autos: vec![],
+      forces: Forces::new_blank(),
     };
     world.create_auto(Auto {
       kind: world.kinds.get("space"),
@@ -106,7 +111,7 @@ impl World {
   }
 
   pub fn create_auto_from_val(&mut self, val: Val) -> AutoNdx {
-    let new = Auto::from_val(val, &self.kinds);
+    let new = Auto::from_val(val, self);
     self.create_auto(new)
   }
 

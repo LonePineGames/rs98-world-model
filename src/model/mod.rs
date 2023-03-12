@@ -1,6 +1,7 @@
 pub mod act;
 pub mod auto;
 pub mod dir;
+pub mod force;
 pub mod kind;
 pub mod pattern;
 pub mod route;
