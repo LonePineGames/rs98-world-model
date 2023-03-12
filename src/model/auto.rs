@@ -1,9 +1,11 @@
+#![allow(non_upper_case_globals)] 
+
 use bevy::prelude::IVec2;
 use conniver::{read_object, read_ivec2, object::read_string, Val};
 
 use crate::model::{kind::Kind, act::Action};
 
-use super::{kind::Kinds, force::ForceNdx, world::World};
+use super::{kind::Kinds, force::ForceNdx, world::World, bitfield::{BitField, BFNDX}};
 
 #[derive(Clone, Default, Debug)]
 pub struct Auto {
@@ -18,9 +20,13 @@ pub struct Auto {
   pub loc: IVec2,
   pub action_time: f64,
   pub stall_message: Option<String>,
-  pub alive: bool,
-  pub action_finished: bool,
+  pub flags: BitField,
 }
+
+#[allow(dead_code)]
+pub const auto_exists          : BFNDX = BFNDX::new(0);
+pub const auto_alive           : BFNDX = BFNDX::new(1);
+pub const auto_action_finished : BFNDX = BFNDX::new(2);
 
 impl Auto {
   pub fn get_item(&self, loc: IVec2) -> Kind {
@@ -59,7 +65,7 @@ impl Auto {
     if new.dim.x == 0 || new.dim.y == 0 {
       new.dim = kind_data.item_dim;
     }
-    new.alive = true;
+    new.flags.set(auto_alive, true);
     let num_items = (new.dim.x * new.dim.y) as usize;
     if new.items.len() < num_items {
       new.items.resize(num_items, Kind(0));

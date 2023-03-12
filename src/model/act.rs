@@ -2,6 +2,8 @@ use bevy::prelude::IVec2;
 
 use crate::model::{kind::{Kind, KindRole}, world::World, auto::{AutoNdx, Auto}, dir::Dir, route::route, slot::Slot};
 
+use super::auto::auto_alive;
+
 #[allow(dead_code)]
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Hash)]
 pub enum Action {
@@ -221,7 +223,7 @@ impl Action {
         let dist = my_loc - other_loc;
         let dist = dist.x.abs() + dist.y.abs();
         if dist <= 5 {
-          world.get_auto_mut(*other).alive = false;
+          world.get_auto_mut(*other).flags.set(auto_alive, false);
           world.finish_auto_action(auto_ndx);
           None
         } else {

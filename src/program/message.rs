@@ -3,7 +3,7 @@ use std::collections::HashMap;
 use bevy::prelude::IVec2;
 use conniver::{Val, object::read_string};
 
-use crate::model::{auto::AutoNdx, world::World, act::Action, kind::Kind, dir::Dir, pattern::Pattern};
+use crate::model::{auto::{AutoNdx, auto_action_finished}, world::World, act::Action, kind::Kind, dir::Dir, pattern::Pattern};
 
 use super::program::ProgramSpace;
 
@@ -179,7 +179,7 @@ fn action_handler(world: &mut World, auto: AutoNdx, generator: Action) -> Option
   let action = world.get_auto_action(auto);
   if action != generator {
     world.set_auto_action(auto, generator);
-  } else if world.get_auto(auto).action_finished {
+  } else if world.get_auto(auto).flags.get(auto_action_finished) {
     world.set_auto_action(auto, Action::Stop);
     return Some(Val::nil());
   }

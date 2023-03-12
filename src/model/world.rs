@@ -4,7 +4,7 @@ use conniver::Val;
 
 use crate::model::{auto::{Auto, AutoNdx}, kind::{Kind, Kinds}, act::Action, pattern::{Pattern, Patterns}, slot::Slot};
 
-use super::force::Forces;
+use super::{force::Forces, auto::auto_action_finished};
 
 #[derive(Resource)]
 pub struct World {
@@ -138,7 +138,7 @@ impl World {
   pub fn set_auto_action(&mut self, auto: AutoNdx, action: Action) {
     let auto = self.get_auto_mut(auto);
     auto.action = action;
-    auto.action_finished = false;
+    auto.flags.set(auto_action_finished, false);
   }
 
   pub fn get_auto_action(&self, auto: AutoNdx) -> Action {
@@ -168,7 +168,7 @@ impl World {
 
   pub fn update_auto(&mut self, ndx: AutoNdx, dur: f64) {
     let auto = self.get_auto_mut(ndx);
-    if !auto.action_finished {
+    if !auto.flags.get(auto_action_finished) {
       auto.action_time += dur;
       if auto.action_time >= 1.0 {
         auto.action_time = 0.0;
@@ -186,7 +186,7 @@ impl World {
 
   pub fn finish_auto_action(&mut self, ndx: AutoNdx) {
     let auto = self.get_auto_mut(ndx);
-    auto.action_finished = true;
+    auto.flags.set(auto_action_finished, true);
     //auto.action = Action::Stop;
     auto.action_time = 0.0;
   }

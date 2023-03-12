@@ -2,7 +2,7 @@
 use bevy::prelude::IVec2;
 use conniver::{p};
 
-use crate::model::{auto::{AutoNdx, Auto}, world::World, act::Action, dir::Dir, kind::{Kind, KindRole}};
+use crate::model::{auto::{AutoNdx, Auto, auto_action_finished, auto_alive}, world::World, act::Action, dir::Dir, kind::{Kind, KindRole}};
 
 use super::kind::Kinds;
 
@@ -281,7 +281,7 @@ fn test_goto() {
   world.set_auto_action(robo, Action::Goto(end));
 
   let mut steps = 0;
-  while !world.get_auto(robo).action_finished {
+  while !world.get_auto(robo).flags.get(auto_action_finished) {
     world.update(2.0);
     assert_eq!(world.stall_message(robo), None);
     steps += 1;
@@ -319,7 +319,7 @@ fn test_goto_impeded() {
   world.set_auto_action(robo, Action::Goto(end));
 
   let mut steps = 0;
-  while !world.get_auto(robo).action_finished {
+  while !world.get_auto(robo).flags.get(auto_action_finished) {
     world.update(2.0);
     assert_eq!(world.stall_message(robo), None);
     steps += 1;
@@ -421,12 +421,12 @@ fn test_fire() {
     dim: IVec2::new(1, 1),
     ..Auto::default()
   });
-  assert_eq!(world.get_auto(robo2).alive, true);
+  assert_eq!(world.get_auto(robo2).flags.get(auto_alive), true);
 
   world.set_auto_action(robo1, Action::Fire(robo2));
   world.update(2.0);
   assert_eq!(world.stall_message(robo1), None);
-  assert_eq!(world.get_auto(robo2).alive, false);
+  assert_eq!(world.get_auto(robo2).flags.get(auto_alive), false);
 
   // test range limits
   let loc3 = IVec2::new(10, 20);
@@ -442,7 +442,7 @@ fn test_fire() {
   world.update(2.0);
 
   assert_eq!(world.stall_message(robo1), Some("Target out of range.".to_string()));
-  assert_eq!(world.get_auto(robo3).alive, true);
+  assert_eq!(world.get_auto(robo3).flags.get(auto_alive), true);
 }
 
 #[test]

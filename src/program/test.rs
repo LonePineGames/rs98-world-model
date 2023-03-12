@@ -3,7 +3,7 @@
 use bevy::prelude::IVec2;
 use conniver::{val::p_all, p};
 
-use crate::{model::{world::World, auto::{AutoNdx, Auto}, act::Action, kind::Kind, dir::Dir}, program::{program::ProgramSpace}};
+use crate::{model::{world::World, auto::{AutoNdx, Auto, auto_action_finished}, act::Action, kind::Kind, dir::Dir}, program::{program::ProgramSpace}};
 
 pub fn run1(world: &mut World, program: &mut ProgramSpace, dur: f64) {
   program.update(dur);
@@ -13,7 +13,7 @@ pub fn run1(world: &mut World, program: &mut ProgramSpace, dur: f64) {
 
 pub fn run100(world: &mut World, program: &mut ProgramSpace, robo: AutoNdx, expected_steps: i32) {
   let mut steps = 0;
-  while steps < 100 && (!program.idle(robo) || (world.get_auto(robo).action != Action::Stop && !world.get_auto(robo).action_finished)) {
+  while steps < 100 && (!program.idle(robo) || (world.get_auto(robo).action != Action::Stop && !world.get_auto(robo).flags.get(auto_action_finished))) {
     run1(world, program, 1.0);
     assert_eq!(world.stall_message(robo), None);
     steps += 1;
