@@ -6,7 +6,7 @@ use bevy::prelude::IVec2;
 use conniver::p;
 
 #[cfg(test)]
-use crate::{model::{world::World, auto::{AutoNdx, Auto}, act::Action}, program::{test::run100, program::ProgramSpace}};
+use crate::{model::{world::World, auto::{AutoNdx, Auto}}, program::{test::run100, program::ProgramSpace}};
 
 #[derive(Clone, Copy, PartialEq, Eq, Hash, Debug, Default)]
 pub struct ForceNdx(pub usize);

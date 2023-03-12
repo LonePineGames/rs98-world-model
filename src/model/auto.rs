@@ -1,11 +1,12 @@
 #![allow(non_upper_case_globals)] 
+#![allow(non_upper_case_globals)] // no way! who wants the code to scream at them? not me.
 
 use bevy::prelude::IVec2;
 use conniver::{read_object, read_ivec2, object::read_string, Val};
 
 use crate::model::{kind::Kind, act::Action};
 
-use super::{kind::Kinds, force::ForceNdx, world::World, bitfield::{BitField, BFNDX}};
+use super::{kind::Kinds, force::ForceNdx, world::World, bitfield::{BitField, BFNdx}};
 
 #[derive(Clone, Default, Debug)]
 pub struct Auto {
@@ -24,9 +25,9 @@ pub struct Auto {
 }
 
 #[allow(dead_code)]
-pub const auto_exists          : BFNDX = BFNDX::new(0);
-pub const auto_alive           : BFNDX = BFNDX::new(1);
-pub const auto_action_finished : BFNDX = BFNDX::new(2);
+pub const auto_exists          : BFNdx = BFNdx::new(0);
+pub const auto_alive           : BFNdx = BFNdx::new(1);
+pub const auto_action_finished : BFNdx = BFNdx::new(2);
 
 impl Auto {
   pub fn get_item(&self, loc: IVec2) -> Kind {
