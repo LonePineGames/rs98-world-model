@@ -6,7 +6,7 @@ use bevy::prelude::IVec2;
 use conniver::p;
 
 #[cfg(test)]
-use crate::{model::{world::World, auto::{AutoNdx, Auto}}, program::{test::run100, program::ProgramSpace}};
+use crate::{model::{world::World, auto::{AutoNdx, Auto}, act::Action}, program::{test::run100, program::ProgramSpace}};
 
 #[derive(Clone, Copy, PartialEq, Eq, Hash, Debug, Default)]
 pub struct ForceNdx(pub usize);
@@ -94,6 +94,7 @@ fn test_load_force() {
       (traction 1)
     )
     (define-kind robo
+      (role auto)
       (traction 5)
     )
     (define-force nature)
@@ -122,9 +123,19 @@ fn test_load_force() {
 
   let earth = AutoNdx(1);
   let robo = AutoNdx(2);
+  let nothing = world.kinds.get("nothing");
   let nature_force = world.forces.get("nature");
   let robo_force = world.forces.get("robo");
   assert_eq!(world.get_auto(earth).force, nature_force);
   assert_eq!(world.get_auto(robo).force, robo_force);
 
+  // place a new robo, make sure it has the right force
+  world.set_item(robo, IVec2::new(0,0), world.kinds.get("robo"));
+  program.interrupt(robo, p("(place)"));
+  run100(&mut world, &mut program, robo, -1);
+  assert_eq!(world.get_auto(robo).stall_message, None);
+  assert_eq!(world.get_item(robo, IVec2::new(0,0)), nothing);
+  assert_eq!(world.autos.len(), 4);
+  let new_robo = AutoNdx(3);
+  assert_eq!(world.get_auto(new_robo).force, robo_force);
 }

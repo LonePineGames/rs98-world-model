@@ -74,12 +74,16 @@ impl Action {
 
           // if we're placing an auto on the ground, create it; otherwise, just place the item
           let is_auto = world.kinds.get_data(holding_kind).role == KindRole::Auto;
-          if is_auto && target_auto == world.get_auto(auto_ndx).parent {
+          let me = world.get_auto(auto_ndx);
+          let parent = me.parent;
+          let force = me.force;
+          if is_auto && target_auto == parent {
             world.set_item(auto_ndx, IVec2::new(0, 0), Kind(0));
             world.create_auto(Auto {
               kind: holding_kind,
               loc: target_ndx,
               parent: target_auto,
+              force,
               ..Default::default()
             });
           } else {

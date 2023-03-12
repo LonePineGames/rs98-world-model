@@ -5,7 +5,7 @@ use crate::model::{kind::Kind, act::Action};
 
 use super::{kind::Kinds, force::ForceNdx, world::World};
 
-#[derive(Clone, Default)]
+#[derive(Clone, Default, Debug)]
 pub struct Auto {
   pub kind: Kind,
   pub parent: AutoNdx,
