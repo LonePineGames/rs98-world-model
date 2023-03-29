@@ -12,7 +12,6 @@ pub enum Action {
   Step(Dir),
   Pick(Kind, Kind),
   Place(Kind),
-  Goto(IVec2),
   Produce,
   Fire(AutoNdx),
 }
@@ -188,7 +187,7 @@ impl Action {
         }
       }*/
 
-      Action::Goto(loc) => {
+      /*Action::Goto(loc) => {
         let rte = route(world, auto_ndx, *loc);
         if let Some(rte) = rte {
           if rte.is_empty() {
@@ -204,7 +203,7 @@ impl Action {
         } else {
           Some(format!("Could not find route to {}.", loc))
         }
-      }
+      }*/
 
       Action::Produce => {
         let auto_data = world.get_auto(auto_ndx);

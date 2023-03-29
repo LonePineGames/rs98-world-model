@@ -1,10 +1,10 @@
 
 (define (input-key char)
   (cond 
-    ((= char 'A) (set-program '(move w)))
-    ((= char 'D) (set-program '(move e)))
-    ((= char 'W) (set-program '(move n)))
-    ((= char 'S) (set-program '(move s)))
+    ((= char 'A) (set-program '(step w)))
+    ((= char 'D) (set-program '(step e)))
+    ((= char 'W) (set-program '(step n)))
+    ((= char 'S) (set-program '(step s)))
     ((= char 'E) (if (= "nothing" (item-at me 0 0)) 
       (set-program '(pick))
       (set-program '(place))
@@ -26,5 +26,10 @@
     (move rest)
   )
 ))
+
+(define (goto x y)
+  (define path (route x y))
+  (move path)
+)
 
 (load "assets/cnvr/user.cnvr")

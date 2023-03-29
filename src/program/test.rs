@@ -43,7 +43,7 @@ fn test_program_goto() {
   let mut program = ProgramSpace::new(robo);
 
   program.set_program(robo, p("(goto 20 20)"));
-  run100(&mut world, &mut program, robo, 22);
+  run100(&mut world, &mut program, robo, 42);
   assert_eq!(world.get_auto(robo).loc, end);
   assert_eq!(world.get_auto(robo).action, Action::Stop);
 }
@@ -84,6 +84,61 @@ fn test_program_route() {
   assert_eq!(program.get_var(robo, &"my-route".to_string()), p("\"eeeeeeeeeeeeeeeeeeennnnnnnnnnnnnnnnnnnnwwwwwwwwwwwwwwwwwwww\""));
 }
 
+
+#[test]
+fn test_goto() {
+  let mut world = World::new_test();
+  let space = AutoNdx(0);
+  let start = IVec2::new(10, 10);
+  let end = IVec2::new(20, 20);
+
+  world.set_all_tiles(space, world.kinds.get("grass"));
+
+  let robo = world.create_auto(Auto {
+    kind: world.kinds.get("robo"),
+    loc: start,
+    parent: space,
+    dim: IVec2::new(1, 1),
+    ..Auto::default()
+  });
+
+  let mut program = ProgramSpace::new(robo);
+  program.interrupt(robo, p("(goto 20 20)"));
+  run100(&mut world, &mut program, robo, -1);
+
+  assert_eq!(world.get_auto(robo).loc, end);
+  assert_eq!(world.get_auto(robo).action, Action::Stop);
+}
+
+#[test]
+fn test_goto_impeded() {
+  let mut world = World::new_test();
+  let space = AutoNdx(0);
+  let start = IVec2::new(10, 10);
+  let end = IVec2::new(20, 20);
+
+  world.set_all_tiles(space, world.kinds.get("grass"));
+
+  for x in 0..40 {
+    world.set_tile(space, IVec2::new(x, 15), world.kinds.get("wall"));
+  }
+
+  let robo = world.create_auto(Auto {
+    kind: world.kinds.get("robo"),
+    loc: start,
+    parent: space,
+    dim: IVec2::new(1, 1),
+    ..Auto::default()
+  });
+
+  let mut program = ProgramSpace::new(robo);
+  program.interrupt(robo, p("(goto 20 20)"));
+  run100(&mut world, &mut program, robo, 86);
+
+  assert_eq!(world.get_auto(robo).loc, end);
+  assert_eq!(world.get_auto(robo).action, Action::Stop);
+}
+
 #[test]
 fn test_input() {
   let mut world = World::new_test();
@@ -103,6 +158,19 @@ fn test_input() {
   });
 
   let mut program = ProgramSpace::new_lib_override(robo, &p_all("
+    (define move (lambda (route)
+      (step (string-head route))
+      (define rest (string-tail route))
+      (if (not (string-empty? rest))
+        (move rest)
+      )
+    ))
+
+    (define (goto x y)
+      (define path (route x y))
+      (move path)
+    )
+
     (define (input-key char)
       (cond 
         ((= char 'A) (set-program '(step w)))
@@ -132,7 +200,7 @@ fn test_input() {
   assert_eq!(world.get_auto(robo).action, Action::Stop);
   
   program.interrupt(robo, p("(input-mouse 20 20)"));
-  run100(&mut world, &mut program, robo, 22);
+  run100(&mut world, &mut program, robo, -1);
   assert_eq!(world.get_auto(robo).loc, elsewhere);
   assert_eq!(world.get_auto(robo).action, Action::Stop);
 }

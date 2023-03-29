@@ -80,25 +80,6 @@ pub fn get_message_handlers() -> HashMap<String, MessageHandler> {
     action_handler(world, auto, Action::Step(dir))
   });
 
-  handlers.insert("goto".to_string(), |args, _, world, auto| {
-    if args.len() < 3 {
-      return Some(Val::String("usage: (goto auto x y)".to_owned()));
-    }
-    let x = if let Val::Num(x) = args[1] {
-      x as i32
-    } else {
-      return Some(Val::String("usage: (goto auto x y)".to_owned()));
-    };
-    let y = if let Val::Num(y) = args[2] {
-      y as i32
-    } else {
-      return Some(Val::String("usage: (goto auto x y)".to_owned()));
-    };
-    let pos = IVec2::new(x, y);
-
-    action_handler(world, auto, Action::Goto(pos))
-  });
-
   handlers.insert("route".to_string(), |args, _, world, auto| {
     if args.len() < 3 {
       return Some(Val::String("usage: (route auto x y)".to_owned()));
