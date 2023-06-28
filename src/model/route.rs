@@ -81,7 +81,7 @@ pub fn route(world: &World, auto_ndx: AutoNdx, dest: IVec2) -> Option<Vec<Dir>> 
     result.push(dir);
     pos += dir.to_ivec2();
   }
-  println!("route: {:?} -> {:?} = {:?}", start, dest, result);
+  //println!("route: {:?} -> {:?} = {:?}", start, dest, result);
 
   if result.is_empty() { return None; }
   assert!(route_valid(world, auto_ndx, &result, dest));
@@ -99,8 +99,8 @@ fn route_valid(world: &World, auto: AutoNdx, route: &[Dir], dest: IVec2) -> bool
       println!("route_valid: {:?} -> {:?} = {:?} failed at {:?}", auto.loc, dest, route, pos);
       return false;
     }
-    println!("route_valid: {:?} -> {:?} = {:?} passed at {:?}", auto.loc, dest, route, pos);
+    //println!("route_valid: {:?} -> {:?} = {:?} passed at {:?}", auto.loc, dest, route, pos);
   }
-  println!("route_valid: {:?} -> {:?} = {:?} succeeded", auto.loc, dest, route);
+  //println!("route_valid: {:?} -> {:?} = {:?} succeeded", auto.loc, dest, route);
   pos == dest
 }

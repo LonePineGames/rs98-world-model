@@ -25,7 +25,8 @@ pub fn start_app() {
       .set(WindowPlugin {
         window: WindowDescriptor {
           title: "Robopocalypse Simulator 98".to_string(),
-          mode: WindowMode::BorderlessFullscreen,
+          //mode: WindowMode::BorderlessFullscreen,
+          mode: WindowMode::Windowed,
           //present_mode: PresentMode::AutoVsync, // vsync
           cursor_visible: true,
           //cursor_grab_mode: CursorGrabMode::Confined,

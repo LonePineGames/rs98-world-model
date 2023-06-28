@@ -10,6 +10,12 @@
 (define-kind earth
 )
 
+(define-kind mars-regolith
+  (role tile)
+  (scene "model/mars-regolith.glb#Scene0")
+  (traction 1)
+)
+
 (define-kind lab-tile
   (role tile)
   (scene "model/lab-tile.glb#Scene0")

@@ -8,7 +8,8 @@
 
 (define loop (lambda x 
   (apply do x)
-  (apply loop x)))
+  (apply loop x)
+))
 
 (define cond-inner (lambda (eval-context clauses)
   (define clause (car clauses))

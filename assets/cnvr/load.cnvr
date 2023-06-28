@@ -6,7 +6,7 @@
   (loc 0 0)
   (parent 0)
   (dim 50 50)
-  (tile lab-tile)
+  (tile mars-regolith)
 ))
 
 (define player (create-auto
@@ -17,13 +17,13 @@
 
 (access player)
 
-(create-auto
+(comment create-auto
   (kind rcarmack)
   (loc 2 4)
   (parent earth-auto)
 )
 
-(create-auto
+(comment create-auto
   (kind jarchi)
   (loc 4 4)
   (parent earth-auto)
